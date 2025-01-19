@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser as AbsUser
 from django.db import models
-from django.db.models import UniqueConstraint as UC, Model
+from django.db.models import UniqueConstraint as UC
+from django.db.models import Model
 
 
 class User(AbsUser):
