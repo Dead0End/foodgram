@@ -6,6 +6,7 @@ from .validators import (
     image_validation
 )
 
+
 class User(AbstractUser):
     """Обычный пользователь."""
     username = models.CharField(
@@ -36,7 +37,7 @@ class User(AbstractUser):
         blank=False,
         null=False
     )
-    icon=models.ImageField(
+    icon = models.ImageField(
         verbose_name='Аватар пользователя',
         help_text='вы можете загрузить отображаемое фото',
         upload_to='users/',
@@ -69,10 +70,9 @@ class Follower(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields = (
+                fields=(
                     'user',
-                    'following'
-                    )),
+                    'following')),
             models.CheckConstraint(
                 check=~models.Q(user=models.F('follower')),
             )]
