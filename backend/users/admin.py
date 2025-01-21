@@ -1,21 +1,20 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import Follower, User
+from users.models import User, Follower
 
 
-@admin.register(User)
-class UserAdmin(UserAdmin):
-    display_list = (
+class Admin(UserAdmin):
+    list_display = (
         'id',
-        'email',
         'username',
+        'email',
         'name',
-        'surname'
-    )
-    filter_list = ('email', 'name')
+        'surname',
+        'icon')
+    ordering = ('id')
 
 
-@admin.register(Follower)
-class FollowerAdmin(admin.ModelAdmin):
-    display_list = ('user', 'author')
+class AdminFollower(Follower):
+    list_display = ('user', 'following')
+    search_fields = ('user', 'following')

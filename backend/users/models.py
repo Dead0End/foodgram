@@ -1,49 +1,83 @@
-from django.contrib.auth.models import AbstractUser as AbsUser
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
-from django.db.models import UniqueConstraint as UC
-from django.db.models import Model
 
+from .validators import (
+    image_validation
+)
 
-class User(AbsUser):
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = [
-        'username',
-        'first_name',
-        'surname'
-    ]
-    email = models.EmailField(
-        max_length=254,
-        unique=True
+class User(AbstractUser):
+    """Обычный пользователь."""
+    username = models.CharField(
+        max_length=150,
+        verbose_name='имя пользователя',
+        help_text='Обязательное поле',
+        unique=True,
+        validators=[UnicodeUsernameValidator]
+    )
+    email = models.CharField(
+        max_length=150,
+        verbose_name='электронная почта',
+        help_text='обязательное поле',
+        unique=True,
+        blank=False,
+        null=False
+    )
+    name = models.CharField(
+        max_length=150,
+        verbose_name='настоящее имя пользователя',
+        help_text='обязательное поле',
+        blank=False,
+        null=False
+    )
+    surname = models.CharField(
+        max_length=150,
+        verbose_name='Фамилия пользователя',
+        blank=False,
+        null=False
+    )
+    icon=models.ImageField(
+        verbose_name='Аватар пользователя',
+        help_text='вы можете загрузить отображаемое фото',
+        upload_to='users/',
+        validators=[image_validation]
     )
 
+    REQUIRED_FIELDS = ['username', 'name', 'surname', 'email']
+
     class Meta:
-        ordering = ['id']
         verbose_name = 'пользователь'
         verbose_name_plural = 'пользователи'
 
     def __str__(self):
         return self.username
+    
 
-
-class Follower(Model):
+class Follower(models.Model):
+    """Пользователь - подписчик."""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='follower',
         verbose_name='подписчик',
     )
-    author = models.ForeignKey(
+    follow = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='author',
-        verbose_name='автор'
-    )
+        related_name='follow')
 
     class Meta:
-        ordering = ['-id']
         constraints = [
-            UC(fields=['user', 'author'],
-               name='unique_follow')
-        ]
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
+            models.UniqueConstraint(
+                fields = (
+                    'user',
+                    'following'
+                    )),
+            models.CheckConstraint(
+                check=~models.Q(user=models.F('follower')),
+            )]
+
+    def __str__(self):
+        return (
+            f'{self.user.username} подписан на {self.follow.username}'
+        )
