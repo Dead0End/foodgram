@@ -72,7 +72,8 @@ class Follower(models.Model):
             models.UniqueConstraint(
                 fields=(
                     'user',
-                    'following')),
+                    'following'),
+                name='me'),
             models.CheckConstraint(
                 check=~models.Q(user=models.F('follower')),
             )]
