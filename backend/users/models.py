@@ -75,6 +75,7 @@ class Follower(models.Model):
                     'following'),
                 name='me'),
             models.CheckConstraint(
+                name='me',
                 check=~models.Q(user=models.F('follower')),
             )]
 
