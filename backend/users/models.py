@@ -44,7 +44,7 @@ class User(AbstractUser):
         validators=[image_validation]
     )
 
-    REQUIRED_FIELDS = ['username', 'name', 'surname', 'email']
+    REQUIRED_FIELDS = ['name', 'surname', 'email']
 
     class Meta:
         verbose_name = 'пользователь'
@@ -73,9 +73,9 @@ class Follower(models.Model):
                 fields=(
                     'user',
                     'following'),
-                name='me'),
+                name='me0'),
             models.CheckConstraint(
-                name='me',
+                name='me1',
                 check=~models.Q(user=models.F('follower')),
             )]
 

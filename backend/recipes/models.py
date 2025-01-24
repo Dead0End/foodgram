@@ -19,7 +19,7 @@ class Tag(models.Model):
     )
 
     class Meta:
-        ordering = ('name')
+        ordering = ('name',)
         verbose_name = ('Тег')
 
 
@@ -36,7 +36,7 @@ class Ingridient(models.Model):
     )
 
     class Meta:
-        ordering = ('name')
+        ordering = ('name',)
         verbose_name = 'ингридиенты'
 
 
@@ -70,7 +70,7 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ('name')
+        ordering = ('name',)
         verbose_name = ('Рецепт')
 
 
@@ -88,7 +88,7 @@ class RecipeItself(models.Model):
     )
 
     class Meta:
-        ordering = ('id')
+        ordering = ('id',)
         verbose_name = 'Рецепт'
 
 
