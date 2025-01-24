@@ -2,7 +2,7 @@ from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
 
 from recipes.models import (User,
-                            Follower,
+                            Favourite,
                             Ingridient,
                             Recipe,
                             RecipeItself,
@@ -58,5 +58,5 @@ class RecipeSerializer(serializers.ModelSerializer):
 class FollowerSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Follower
+        model = Favourite
         fields = '__all__'
