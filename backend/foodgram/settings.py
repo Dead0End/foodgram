@@ -19,9 +19,6 @@ DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1').split(',')
 
-CSRF_TRUSTED_ORIGINS = ('http://defoodgram.zapto.org',
-                        'https://defoodgram.zapto.org')
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -160,4 +157,6 @@ DJOSER = {
     },
 }
 
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(' ')
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS',
+                                 'http://defoodgram.zapto.org https://defoodgram.zapto.org'
+                                 ).split(' ')
