@@ -24,14 +24,14 @@ class User(AbstractUser):
         blank=False,
         null=False
     )
-    name = models.CharField(
+    first_name = models.CharField(
         max_length=150,
         verbose_name='настоящее имя пользователя',
         help_text='обязательное поле',
         blank=False,
         null=False
     )
-    surname = models.CharField(
+    last_name = models.CharField(
         max_length=150,
         verbose_name='Фамилия пользователя',
         blank=False,
