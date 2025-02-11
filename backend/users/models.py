@@ -44,7 +44,7 @@ class User(AbstractUser):
         validators=[image_validation]
     )
 
-    REQUIRED_FIELDS = ['name', 'surname', 'email']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'email']
 
     class Meta:
         verbose_name = 'пользователь'
