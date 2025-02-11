@@ -8,8 +8,8 @@ class Admin(UserAdmin):
         'id',
         'username',
         'email',
-        'name',
-        'surname',
+        'first_name',
+        'last_name',
         'icon')
     ordering = ('id')
 
