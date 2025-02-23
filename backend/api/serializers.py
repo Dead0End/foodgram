@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
+from django.contrib.auth.models import AnonymousUser
 
 from recipes.models import (User,
                             Favourite,
@@ -19,10 +20,32 @@ class RecipeItselfSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    avatar = Base64ImageField(required=False, allow_null=True)
+    is_subscribed = serializers.SerializerMethodField()
+
+    def get_is_subscribed(self, obj):
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+        return request.user.follower.filter(author=obj).exists()
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        if isinstance(request.user, AnonymousUser):
+            return {
+                'id': 0,
+                'username': '',
+                'first_name': '',
+                'last_name': '',
+                'email': '',
+                'avatar': None,
+                'is_subscribed': False
+            }
+        return super().to_representation(instance)
 
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'avatar', 'is_subscribed']
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -60,3 +83,11 @@ class FollowerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favourite
         fields = '__all__'
+
+
+class AvatarSerializer(serializers.ModelSerializer):
+    avatar = Base64ImageField(allow_null=True)
+
+    class Meta:
+        model = User
+        fields = ('avatar',)
