@@ -9,7 +9,7 @@ from .validators import (
 )
 
 
-class User(AbstractUser):
+class CustomUser(AbstractUser):
     """Обычный пользователь."""
     username = models.CharField(
         max_length=150,
@@ -41,11 +41,12 @@ class User(AbstractUser):
         blank=False,
         null=False
     )
-    icon = models.ImageField(
+    avatar = models.ImageField(
         verbose_name='Аватар пользователя',
         help_text='вы можете загрузить отображаемое фото',
         upload_to='users/avatars',
-        validators=[image_validation]
+        validators=[image_validation],
+        null = True
     )
 
     REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'password']
@@ -61,13 +62,13 @@ class User(AbstractUser):
 class Follower(models.Model):
     """Пользователь - подписчик."""
     user = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='follower',
         verbose_name='подписчик',
     )
     follow = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='follow')
 

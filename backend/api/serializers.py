@@ -1,13 +1,16 @@
 from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth import get_user_model
+from djoser.serializers import UserSerializer, UserCreateSerializer
 
-from recipes.models import (User,
-                            Favourite,
+from recipes.models import (Favourite,
                             Ingridient,
                             Recipe,
                             RecipeItself,
                             Tag)
+
+User = get_user_model()
 
 
 class RecipeItselfSerializer(serializers.ModelSerializer):
@@ -19,9 +22,14 @@ class RecipeItselfSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(UserSerializer):
     avatar = Base64ImageField(required=False, allow_null=True)
     is_subscribed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'avatar', 'is_subscribed']
+
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
@@ -29,23 +37,12 @@ class UserSerializer(serializers.ModelSerializer):
             return False
         return request.user.follower.filter(author=obj).exists()
 
-    def to_representation(self, instance):
-        request = self.context.get('request')
-        if isinstance(request.user, AnonymousUser):
-            return {
-                'id': 0,
-                'username': '',
-                'first_name': '',
-                'last_name': '',
-                'email': '',
-                'avatar': None,
-                'is_subscribed': False
-            }
-        return super().to_representation(instance)
+
+class CustomUserCreateSerializer(UserCreateSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'avatar', 'is_subscribed']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password']
 
 
 class TagSerializer(serializers.ModelSerializer):

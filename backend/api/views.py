@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from django.contrib.auth.models import AnonymousUser
-
+from djoser.views import UserViewSet
+from django.contrib.auth import get_user_model
 
 from .pagination import Pagination
 from rest_framework.pagination import PageNumberPagination
@@ -19,8 +19,7 @@ from recipes.models import (
     Recipe,
     Tag
 )
-from users.models import User
-
+User = get_user_model()
 
 class IngridientViewSet(ModelViewSet):
     serializer_class = IngridientSerializer
@@ -32,17 +31,10 @@ class IngridientViewSet(ModelViewSet):
 
 class RecipeViewSet(ModelViewSet):
     serializer_class = RecipeSerializer
-    permission_class = (IsAuthorOrReadOnly,
-                        IsUnauthorizedUser)
-    ordering = ('id')
+    permission_classes = (IsAuthorOrReadOnly, IsUnauthorizedUser)
+    ordering = ('id',)
     pagination_class = Pagination
     queryset = Recipe.objects.all()
-    
-    def paginate(self, request):
-        paginator = self.pagination_class
-        page = paginator.paginate_queryset(queryset, request)
-        serializer = RecipeSerializer(page, many=True)
-        return paginator.get_paginated_response(serializer.data)
 
 
 class TagViewSet(ModelViewSet):
@@ -52,9 +44,9 @@ class TagViewSet(ModelViewSet):
     queryset = Tag.objects.all()
 
 
-class UserViewSet(ModelViewSet):
+class UserViewSet(UserViewSet):
     serializer_class = UserSerializer
-    permission_class = (IsAuthorOrReadOnly, IsUnauthorizedUser)
+    # permission_class = (IsAuthorOrReadOnly)
     ordering = ('id')
     pagination_class = Pagination
     queryset = User.objects.all()
@@ -67,11 +59,11 @@ class UserViewSet(ModelViewSet):
         return paginator.get_paginated_response(serializer.data)
 
 
-class UserCreateView(ModelViewSet):
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# class UserCreateView(ModelViewSet):
+#     def post(self, request):
+#         serializer = UserSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

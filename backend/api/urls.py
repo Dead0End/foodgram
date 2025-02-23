@@ -7,7 +7,6 @@ from api.views import (
     RecipeViewSet,
     TagViewSet,
     UserViewSet,
-    UserCreateView,
 )
 
 app_name = 'api'
@@ -18,11 +17,10 @@ router.register('users', UserViewSet, basename='users')
 router.register('tags', TagViewSet, basename='tags')
 router.register('ingredients', IngridientViewSet, basename='ingredients')
 router.register('recipes', RecipeViewSet, basename='recipes')
-router.register('create_user', UserCreateView, basename='create_user')
 
 urlpatterns = [
     path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),  # токены
     path('', include(router.urls)),
-    path('auth/', include('djoser.urls.jwt')),
+    # path('auth/', include('djoser.urls.jwt')),
 ]
