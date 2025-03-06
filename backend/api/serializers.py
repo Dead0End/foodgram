@@ -15,7 +15,7 @@ User = get_user_model()
 
 class RecipeItselfSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='ingredient.name')
-    measurment_unit = serializers.CharField(source='ingredient.measurment_unit')
+    measurement_unit = serializers.CharField(source='ingredient.measurement_unit')
 
     class Meta:
         model = RecipeItself
@@ -35,7 +35,7 @@ class UserSerializer(UserSerializer):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
-        return request.user.follower.filter(author=obj).exists()
+        return request.user.follower.filter(follow=obj).exists()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -49,14 +49,28 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = '__all__'
+        fields = (
+            'id',
+            'name',
+            'slug'
+        )
 
 
 class IngridientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingridient
-        ffields = '__all__'
+        fields = (
+            'id',
+            'name',
+            'measurement_unit'
+            )
+
+
+class IngridientCreateSerializer(IngridientSerializer):
+
+    class Meta(IngridientSerializer.Meta):
+        fields = ['name', 'measurement_unit']
 
 
 class RecipeSerializer(serializers.ModelSerializer):

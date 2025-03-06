@@ -31,9 +31,10 @@ class Ingridient(models.Model):
         verbose_name='Ингридиенты',
         blank=False
     )
-    measurment_unit = models.CharField(
+    measurement_unit = models.CharField(
         max_length=150,
-        verbose_name=('Единицы измерения')
+        verbose_name=('Единицы измерения'),
+        blank=False
     )
 
     class Meta:
@@ -60,11 +61,11 @@ class Recipe(models.Model):
         validators=[
             MinValueValidator(1)]
     )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name=('Автор')
-    )
+    #author = models.ForeignKey(
+    #    User,
+    #    on_delete=models.CASCADE,
+    #    verbose_name=('Автор')
+    #)
     tag = models.ManyToManyField(
         Tag,
         verbose_name=('Тег')

@@ -23,9 +23,7 @@ class IsUnauthorizedUser(permissions.BasePermission):
     """
     Разрешение, которое позволяет доступ только неавторизованным пользователям.
     """
-
     def has_permission(self, request, view):
         return not request.user.is_authenticated
-
     def handle_no_permission(self):
         return Response({"detail": "Доступ запрещен для авторизованных пользователей."}, status=status.HTTP_403_FORBIDDEN)

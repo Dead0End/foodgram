@@ -10,7 +10,7 @@ class Admin(UserAdmin):
         'email',
         'first_name',
         'last_name',
-        'icon')
+        'avatar')
     ordering = ('id')
 
 
