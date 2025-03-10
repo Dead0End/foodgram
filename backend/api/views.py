@@ -1,9 +1,11 @@
-from rest_framework import status, mixins, viewsets
+from rest_framework import status, mixins, viewsets, generics
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
@@ -18,12 +20,18 @@ from .serializers import (
     IngridientCreateSerializer,
     RecipeSerializer,
     TagSerializer,
-    AvatarSerializer
+    AvatarSerializer,
+    SubscriptionSerializer,
+    CreateSubscribeSerializer
 )
 from recipes.models import (
     Ingridient,
     Recipe,
-    Tag
+    Tag,
+    Subscription
+)
+from users.models import(
+    CustomUser
 )
 User = get_user_model()
 
@@ -114,3 +122,44 @@ class UserViewSet(UserViewSet):
             return Response({'detail': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
         serializer = self.serializer_class(request.user)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], url_path='subscribe')
+    def subscribe(self, request, **kwargs):
+        """Подписка на пользователя."""
+        user = request.user
+        author = get_object_or_404(User, pk=self.kwargs['id'])
+    
+        if user == author:
+            return Response({'errors': 'Вы не можете подписаться сами на себя'}, status=status.HTTP_400_BAD_REQUEST)
+    
+        if Subscription.objects.filter(user=user, author=author).exists():
+            return Response({'errors': 'Вы уже подписаны на этого пользователя'}, status=status.HTTP_400_BAD_REQUEST)
+    
+        try:
+            subscription = Subscription.objects.create(user=user, author=author)
+            serializer = SubscriptionSerializer(subscription)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            print(f"Ошибка при создании подписки: {e}")
+            return Response({'errors': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=True, methods=['get'], url_path='subscriptions')
+    def subscriptions(self, request, pk=None):
+        """Список подписок"""
+        subscription_list = subscriptions.get_object(all)
+        return subscription_list
+
+    @action(detail=True, methods=['delete'], url_path='unsubscribe')
+    def unsubscribe(self, request, pk=None):
+        """Отписка от пользователя."""
+        author = get_object_or_404(User, pk=pk)
+        subscription = Subscribe.objects.filter(user=request.user, author=author)
+
+        if not subscription.exists():
+            return Response(
+                {'errors': 'Вы не подписаны на этого пользователя'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        subscription.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

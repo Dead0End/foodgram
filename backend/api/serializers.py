@@ -8,7 +8,8 @@ from recipes.models import (Favourite,
                             Ingridient,
                             Recipe,
                             RecipeItself,
-                            Tag)
+                            Tag,
+                            Subscription)
 
 User = get_user_model()
 
@@ -73,6 +74,58 @@ class IngridientCreateSerializer(IngridientSerializer):
         fields = ['name', 'measurement_unit']
 
 
+class SubscriptionSerializer(serializers.ModelSerializer):
+    """Сериализатор для представления подписок."""
+
+    email = serializers.EmailField(source='author.email')
+    id = serializers.IntegerField(source='author.id')
+    username = serializers.CharField(source='author.username')
+    first_name = serializers.CharField(source='author.first_name')
+    last_name = serializers.CharField(source='author.last_name')
+    is_subscribed = serializers.BooleanField(default=True)
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+    avatar = serializers.ImageField(source='author.avatar')
+
+    class Meta:
+        model = Subscription
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count',
+            'avatar',
+        )
+        read_only_fields = fields
+
+    def get_recipes_count(self, obj):
+        """Получение количества рецептов автора."""
+        return obj.author.recipes.count()
+
+    def get_recipes(self, obj):
+        """Получение рецептов автора с учетом лимита."""
+        request = self.context.get('request')
+        if not request:
+            return []
+
+        recipes = obj.author.recipes.all()
+        recipes_limit = request.query_params.get('recipes_limit')
+
+        if recipes_limit is not None:
+            try:
+                recipes_limit = int(recipes_limit)
+                recipes = recipes[:recipes_limit]
+            except ValueError:
+                pass
+
+        return SubscribedRecipeSerializer(
+            recipes, many=True, context={'request': request}
+        ).data
+
 class RecipeSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
@@ -102,3 +155,16 @@ class AvatarSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('avatar',)
+
+class CreateSubscribeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Subscription
+        fields = '__all__'
+    
+    def validation(self, data):
+        user = self.context.get('request').user
+        subscriber = data.get('subscriber')
+        if user == subscriber:
+            raise ValidationError('Нельзя пподписаться на себя')
+

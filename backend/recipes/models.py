@@ -125,3 +125,53 @@ class ShoppingList(models.Model):
 
     class Meta:
         verbose_name = ('Корзина')
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='subscriptions'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='subscribers'
+    )
+
+    class Meta:
+        unique_together = ('user', 'author')
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
+
+    def clean(self):
+        if self.user == self.author:
+            raise ValidationError("Вы не можете подписаться на себя")
+
+    def __str__(self):
+        return f"{self.user.username} подписан на {self.author.username}"
+
+
+class ShoppingCart(models.Model):
+    user = models.ForeignKey(
+        User,
+        verbose_name='Пользователь',
+        on_delete=models.CASCADE,
+        related_name='cart_items',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        verbose_name='Рецепт',
+        on_delete=models.CASCADE,
+        related_name='carts',
+    )
+
+    class Meta:
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Списки покупок'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_cart_entry',
+            )
+        ]
