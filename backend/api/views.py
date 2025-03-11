@@ -1,5 +1,6 @@
 from rest_framework import status, mixins, viewsets, generics
 from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
@@ -50,13 +51,31 @@ class IngridientViewSet(mixins.RetrieveModelMixin,
             return IngridientCreateSerializer
         return IngridientSerializer
 
-
 class RecipeViewSet(ModelViewSet):
-    serializer_class = RecipeSerializer
-    permission_classes = (IsAuthorOrReadOnly, IsUnauthorizedUser)
-    ordering = ('id',)
-    pagination_class = Pagination
     queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
+    permission_classes = [IsAuthorOrReadOnly]
+
+    @action(detail=False, methods=['post', 'delete'], permission_classes=[IsAuthenticated])
+    def create_delete(self, request):
+        if request.method == 'POST':
+            # Создание нового рецепта
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(author=request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        elif request.method == 'DELETE':
+            # Удаление рецепта
+            recipe_id = request.data.get('id')
+            try:
+                recipe = Recipe.objects.get(id=recipe_id, author=request.user)
+                recipe.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            except Recipe.DoesNotExist:
+                return Response({'error': 'Рецепт не найден или вы не являетесь его автором.'}, 
+                                status=status.HTTP_404_NOT_FOUND)
 
 
 class TagViewSet(mixins.RetrieveModelMixin,
