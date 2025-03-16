@@ -24,10 +24,11 @@ from .serializers import (
     SubscriptionSerializer,
     CreateSubscribeSerializer,
     RecipeCreateSerializer,
-    RecipeReadSerializer
+    RecipeReadSerializer,
+    CustomUserSerializer
 )
 from recipes.models import (
-    Ingridient,
+    Ingredient,
     Recipe,
     Tag,
     Subscription
@@ -40,7 +41,7 @@ User = get_user_model()
 class IngridientViewSet(mixins.RetrieveModelMixin,
                         mixins.ListModelMixin,
                         viewsets.GenericViewSet):
-    queryset = Ingridient.objects.all()
+    queryset = Ingredient.objects.all()
     search_fields = ['name']
     http_method_names = ['get']
     pagination_class = None
@@ -157,7 +158,7 @@ class UserViewSet(UserViewSet):
         subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class RecipeViewSet(UserViewSet):
+class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeCreateSerializer
     filter_backends = (DjangoFilterBackend,)
@@ -171,7 +172,7 @@ class RecipeViewSet(UserViewSet):
     restricted_actions = {'update', 'partial_update', 'destroy'}
     restricted_permission = IsAuthorOrReadOnly
     serializer_map = {'get': RecipeReadSerializer}
-    default_serializer = RecipeCreateSerializer
+    default_serializer = (RecipeCreateSerializer, CustomUserSerializer)
 
     def _handle_action(
         self, request, pk, related_name, add_error, remove_error

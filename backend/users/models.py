@@ -8,7 +8,6 @@ from .validators import (
     username_validation
 )
 
-
 class CustomUser(AbstractUser):
     """Обычный пользователь."""
     username = models.CharField(
@@ -38,6 +37,12 @@ class CustomUser(AbstractUser):
     last_name = models.CharField(
         max_length=150,
         verbose_name='Фамилия пользователя',
+        blank=False,
+        null=False
+    )
+    password = models.CharField(
+        max_length=32,
+        verbose_name='Пароль',
         blank=False,
         null=False
     )

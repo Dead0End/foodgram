@@ -1,6 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.contrib.auth import get_user_model
+from users.models import CustomUser
 
 User = get_user_model()
 
@@ -24,7 +25,7 @@ class Tag(models.Model):
         verbose_name = ('Тег')
 
 
-class Ingridient(models.Model):
+class Ingredient(models.Model):
     """Класс ингридиента."""
     name = models.CharField(
         max_length=150,
@@ -76,6 +77,80 @@ class Recipe(models.Model):
         verbose_name = ('Рецепт')
 
 
+class RecipeUser(models.Model):
+    username = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='User',
+        verbose_name='пользователь',
+        blank = False
+    )
+    email = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='Email',
+        verbose_name='Email',
+        blank = False
+    )
+    password = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='Password',
+        verbose_name='Пароль',
+        blank = False
+    )
+    first_name = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='First_name',
+        verbose_name='Имя',
+        blank = False
+    )
+    last_name = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='Last_name',
+        verbose_name='Фамилия',
+        blank = False
+    )
+    name = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='Recipe',
+        verbose_name='Рецепт',
+        blank = False
+    )
+    text = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='Text',
+        verbose_name='Текст',
+        blank = False
+
+    )
+    image = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='Image',
+        verbose_name='Фото',
+        blank = False
+    )
+    cooking_time = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='Cooking_time',
+        verbose_name='Время приготовления',
+        blank = False
+    )
+    tag = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='Tag',
+        verbose_name='Тег',
+        blank = False
+    )
+
+
 class RecipeItself(models.Model):
     """Класс для объединения рецепта и ингридиентов."""
     recipe = models.ForeignKey(
@@ -83,8 +158,8 @@ class RecipeItself(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Рецепт',
     )
-    Ingridients = models.ForeignKey(
-        Ingridient,
+    Ingredients = models.ForeignKey(
+        Ingredient,
         on_delete=models.CASCADE,
         verbose_name=('Ингридиенты')
     )
@@ -175,3 +250,6 @@ class ShoppingCart(models.Model):
                 name='unique_cart_entry',
             )
         ]
+
+class FullRecipe(models.Model):
+    User

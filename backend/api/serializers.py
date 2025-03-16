@@ -7,22 +7,23 @@ from django.contrib.auth import get_user_model
 from djoser.serializers import UserSerializer, UserCreateSerializer
 
 from recipes.models import (Favourite,
-                            Ingridient,
+                            Ingredient,
                             Recipe,
                             RecipeItself,
+                            RecipeUser,
                             Tag,
                             Subscription)
-
+from users.models import(
+    CustomUser
+)
 User = get_user_model()
 
 
-class RecipeItselfSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='ingredient.name')
-    measurement_unit = serializers.CharField(source='ingredient.measurement_unit')
+class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = RecipeItself
-        fields = '__all__'
+        model = CustomUser
+        fields = ['id', 'username', 'first_name', 'last_name', 'email',]
 
 
 class UserSerializer(UserSerializer):
@@ -30,7 +31,7 @@ class UserSerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'avatar', 'is_subscribed']
 
 
@@ -44,7 +45,7 @@ class UserSerializer(UserSerializer):
 class CustomUserCreateSerializer(UserCreateSerializer):
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password']
 
 
@@ -62,7 +63,7 @@ class TagSerializer(serializers.ModelSerializer):
 class IngridientSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Ingridient
+        model = Ingredient
         fields = (
             'id',
             'name',
@@ -81,6 +82,24 @@ class StandartRecipeSerializer(serializers.ModelSerializer):
             'image',
             'text',
             'cooking_time',
+        )
+
+class NonAuthorRecipeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecipeUser
+        fields = (
+            'id',
+            'tags',
+            'ingredients',
+            'name',
+            'image',
+            'text',
+            'cooking_time',
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'password'
         )
 
 
@@ -205,8 +224,7 @@ class CreateSubscribeSerializer(serializers.ModelSerializer):
         if user == subscriber:
             raise ValidationError('Нельзя пподписаться на самого себя')
 
-class RecipeCreateSerializer(StandartRecipeSerializer):
-    author = UserCreateSerializer(read_only=True)
+class RecipeCreateSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=True)
     ingredients = IngridientSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
@@ -214,9 +232,8 @@ class RecipeCreateSerializer(StandartRecipeSerializer):
     )
     cooking_time = serializers.IntegerField(validators=(MinValueValidator(1),))
 
-    class Meta(StandartRecipeSerializer.Meta):
-        fields = StandartRecipeSerializer.Meta.fields
-        read_only_fields = ('author',)
+    class Meta(NonAuthorRecipeSerializer.Meta):
+        fields = NonAuthorRecipeSerializer.Meta.fields
 
     def validate_image(self, image):
         if not image:
@@ -260,9 +277,7 @@ class RecipeCreateSerializer(StandartRecipeSerializer):
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
-        recipe = Recipe.objects.create(
-            author=self.context.get('request').user, **validated_data
-        )
+        recipe = RecipeUser.objects.create(pk)
         recipe.tags.set(tags)
         self.create_ingredients(recipe, ingredients)
         return recipe

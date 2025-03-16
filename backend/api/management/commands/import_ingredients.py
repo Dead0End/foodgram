@@ -1,6 +1,6 @@
 import csv
 from django.core.management.base import BaseCommand, CommandError
-from recipes.models import Ingridient
+from recipes.models import Ingredient
 from django.core.exceptions import ValidationError
 
 class Command(BaseCommand):
@@ -16,10 +16,9 @@ class Command(BaseCommand):
         try:
             with open(csv_file_path, mode='r', encoding='utf-8') as csvfile:
                 reader = csv.reader(csvfile)
-                next(reader)
                 for row in reader:
                     try:
-                        ingredient = Ingridient(
+                        ingredient = Ingredient(
                             name=row[0],
                             measurement_unit=row[1]
                         )
@@ -29,7 +28,6 @@ class Command(BaseCommand):
                             ingredient.name,
                             ingredient.measurement_unit
                         })
-                        self.stdout.write(self.style.SUCCESS(f'Успешно импортирован ингредиент: {ingredient.name}'))
                     except ValidationError as e:
                         self.stdout.write(self.style.ERROR(f"Ошибка валидации строки {row}: {e}"))
                     except Exception as e:
