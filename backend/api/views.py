@@ -1,20 +1,18 @@
-from rest_framework import status, mixins, viewsets, generics
+from rest_framework import status, mixins, viewsets
 from rest_framework.permissions import AllowAny
-from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from django.contrib.auth import get_user_model
-from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
+from django.core.exceptions import ValidationError
+from django.db.models import Sum
 
-from .pagination import Pagination, IngredientResultsPagination
-from rest_framework.pagination import PageNumberPagination
-from .permissions import IsAuthorOrReadOnly, IsUnauthorizedUser
+from .pagination import Pagination
+from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     UserSerializer,
     IngridientSerializer,
@@ -22,10 +20,10 @@ from .serializers import (
     TagSerializer,
     AvatarSerializer,
     SubscriptionSerializer,
-    CreateSubscribeSerializer,
     RecipeCreateSerializer,
     RecipeReadSerializer,
-    CustomUserSerializer
+    CustomUserSerializer,
+    RecipeTestSerializer
 )
 from recipes.models import (
     Ingredient,
@@ -33,10 +31,8 @@ from recipes.models import (
     Tag,
     Subscription
 )
-from users.models import(
-    CustomUser
-)
 User = get_user_model()
+
 
 class IngridientViewSet(mixins.RetrieveModelMixin,
                         mixins.ListModelMixin,
@@ -52,8 +48,6 @@ class IngridientViewSet(mixins.RetrieveModelMixin,
         if self.action in ['create']:
             return IngridientCreateSerializer
         return IngridientSerializer
-
-
 
 
 class TagViewSet(mixins.RetrieveModelMixin,
@@ -78,20 +72,12 @@ class UserViewSet(UserViewSet):
     pagination_class = Pagination
     queryset = User.objects.all()
 
-
-    def paginate(self, request):
-        paginator = self.pagination_class
-        page = paginator.paginate_queryset(queryset, request)
-        serializer = UserSerializer(page, many=True)
-        return paginator.get_paginated_response(serializer.data)
-
     @action(methods=['GET'],
             detail=False)
     def me(self, request, *args, **kwargs):
         self.get_object = self.get_instance
         return self.retrieve(request, *args, **kwargs)
 
-    
     @action(
         methods=['PUT', 'DELETE'],
         detail=False,
@@ -124,13 +110,13 @@ class UserViewSet(UserViewSet):
     def subscribe(self, request, **kwargs):
         user = request.user
         author = get_object_or_404(User, pk=self.kwargs['id'])
-    
+
         if user == author:
             return Response({'errors': 'Нелльзя подписаться на себя'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
         if Subscription.objects.filter(user=user, author=author).exists():
             return Response({'errors': 'Вы уже подписаны'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
         try:
             subscription = Subscription.objects.create(user=user, author=author)
             serializer = SubscriptionSerializer(subscription)
@@ -138,16 +124,16 @@ class UserViewSet(UserViewSet):
         except Exception as e:
             print(f"Ошибка при создании подписки: {e}")
             return Response({'errors': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
     @action(detail=True, methods=['get'], url_path='subscriptions')
     def subscriptions(self, request, pk=None):
-        subscription_list = subscriptions.get_object(all)
+        subscription_list = Subscription.get_object(all)
         return subscription_list
 
     @action(detail=True, methods=['delete'], url_path='unsubscribe')
     def unsubscribe(self, request, pk=None):
         author = get_object_or_404(User, pk=pk)
-        subscription = Subscribe.objects.filter(user=request.user, author=author)
+        subscription = Subscription.objects.filter(user=request.user, author=author)
 
         if not subscription.exists():
             return Response(
@@ -158,9 +144,10 @@ class UserViewSet(UserViewSet):
         subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeCreateSerializer
+    serializer_class = RecipeTestSerializer
     filter_backends = (DjangoFilterBackend,)
     open_actions = {'list', 'retrieve', 'get_link'}
     authenticated_actions = {
@@ -171,21 +158,18 @@ class RecipeViewSet(ModelViewSet):
     }
     restricted_actions = {'update', 'partial_update', 'destroy'}
     restricted_permission = IsAuthorOrReadOnly
-    serializer_map = {'get': RecipeReadSerializer}
-    default_serializer = (RecipeCreateSerializer, CustomUserSerializer)
 
-    def _handle_action(
+    def handle_action(
         self, request, pk, related_name, add_error, remove_error
     ):
         recipe = get_object_or_404(Recipe, id=pk)
         user = request.user
-        author = get_object_or_404(User, pk=self.kwargs['id'])
         related_manager = getattr(user, related_name)
         if request.method == 'POST':
             if related_manager.filter(id=recipe.id).exists():
                 raise ValidationError(add_error)
             related_manager.add(recipe)
-            serializer = RecipeShortSerializer(
+            serializer = RecipeTestSerializer(
                 recipe, context={'request': request}
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -216,22 +200,6 @@ class RecipeViewSet(ModelViewSet):
 
     @action(
         methods=('GET',),
-        detail=True,
-        url_path='get-link',
-    )
-    def get_link(self, request, pk=None):
-        return JsonResponse(
-            {
-                'short-link': generate_short_link(
-                    get_object_or_404(Recipe, id=pk).id,
-                    request.build_absolute_uri('/'),
-                )
-            },
-            status=status.HTTP_200_OK,
-        )
-
-    @action(
-        methods=('GET',),
         detail=False,
         url_path='download_shopping_cart',
         permission_classes=(IsAuthenticated,),
@@ -253,17 +221,9 @@ class RecipeViewSet(ModelViewSet):
                 {'detail': 'Список покупок пуст'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        ingredients = {
-            (
-                item['recipe_ingredients__ingredient__name'],
-                item['recipe_ingredients__ingredient__measurement_unit'],
-            ): item['total_amount']
-            for item in shopping_cart_recipes
-        }
-        return FileResponse(
-            generate_shopping_list_pdf(ingredients),
-            as_attachment=True,
-            filename='shopping_list_{}_{}.pdf'.format(
-                user.username, datetime.now().strftime("%Y-%m-%d")
-            ),
-        )
+
+
+class RecipeTestViewSet(ModelViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeTestSerializer
+    permission_classes=[IsAuthenticated, IsAuthorOrReadOnly]

@@ -25,5 +25,6 @@ class IsUnauthorizedUser(permissions.BasePermission):
     """
     def has_permission(self, request, view):
         return not request.user.is_authenticated
+
     def handle_no_permission(self):
         return Response({"detail": "Доступ запрещен для авторизованных пользователей."}, status=status.HTTP_403_FORBIDDEN)
