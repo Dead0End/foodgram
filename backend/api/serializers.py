@@ -314,8 +314,14 @@ class RecipeTestSerializer(serializers.ModelSerializer):
 
             RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient_data['ingredient'], amount=ingredient_data['amount'])
         recipe.tags.set(tags_data)
-
         return recipe
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['tags'] = TagSerializer(
+            instance.tags.all(), many=True
+        ).data
+        return representation
 
     class Meta:
         model = Recipe
