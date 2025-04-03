@@ -1,7 +1,9 @@
 import csv
+
 from django.core.management.base import BaseCommand, CommandError
 from recipes.models import Ingredient
 from django.core.exceptions import ValidationError
+
 
 class Command(BaseCommand):
     help = 'Импортирует ингредиенты из CSV файла'
