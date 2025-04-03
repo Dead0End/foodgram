@@ -20,9 +20,6 @@ from .serializers import (
     TagSerializer,
     AvatarSerializer,
     SubscriptionSerializer,
-    RecipeCreateSerializer,
-    RecipeReadSerializer,
-    CustomUserSerializer,
     RecipeTestSerializer
 )
 from recipes.models import (
