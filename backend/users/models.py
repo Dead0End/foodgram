@@ -43,7 +43,7 @@ class CustomUser(AbstractUser):
         verbose_name='Аватар пользователя',
         help_text='вы можете загрузить отображаемое фото',
         upload_to='users/avatars',
-        null = True
+        null=True
     )
 
     REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'password']

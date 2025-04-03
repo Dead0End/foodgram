@@ -28,6 +28,7 @@ from recipes.models import (
     Tag,
     Subscription
 )
+
 User = get_user_model()
 
 
@@ -223,4 +224,4 @@ class RecipeViewSet(ModelViewSet):
 class RecipeTestViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeTestSerializer
-    permission_classes=[IsAuthenticated, IsAuthorOrReadOnly]
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
