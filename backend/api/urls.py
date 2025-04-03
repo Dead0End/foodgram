@@ -3,7 +3,6 @@ from django.urls import path, include, re_path
 
 from api.views import (
     IngridientViewSet,
-    RecipeViewSet,
     TagViewSet,
     UserViewSet,
     RecipeTestViewSet

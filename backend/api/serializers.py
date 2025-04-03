@@ -18,6 +18,7 @@ from recipes.models import (Favourite,
                             RecipeItself,
                             RecipeIngredient)
 from users.models import (CustomUser)
+
 User = get_user_model()
 
 
