@@ -2,11 +2,6 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import (UnicodeUsernameValidator)
 from django.db import models
 
-from .validators import (
-    image_validation,
-    email_validation,
-    username_validation
-)
 
 class CustomUser(AbstractUser):
     """Обычный пользователь."""
@@ -15,8 +10,7 @@ class CustomUser(AbstractUser):
         verbose_name='имя пользователя',
         help_text='Обязательное поле',
         unique=True,
-        validators=[UnicodeUsernameValidator,
-                    username_validation]
+        validators=[UnicodeUsernameValidator]
     )
     email = models.CharField(
         max_length=150,
@@ -25,7 +19,6 @@ class CustomUser(AbstractUser):
         unique=True,
         blank=False,
         null=False,
-        validators=[email_validation]
     )
     first_name = models.CharField(
         max_length=150,
@@ -50,7 +43,6 @@ class CustomUser(AbstractUser):
         verbose_name='Аватар пользователя',
         help_text='вы можете загрузить отображаемое фото',
         upload_to='users/avatars',
-        validators=[image_validation],
         null = True
     )
 
