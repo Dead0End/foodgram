@@ -301,6 +301,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         model = RecipeIngredient
         fields = ['id', 'amount']
 
+
 class RecipeTestSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=True)
     tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
@@ -309,7 +310,6 @@ class RecipeTestSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
         tags_data = validated_data.pop('tags')
-        user = self.context['request'].user
         recipe = Recipe.objects.create(**validated_data)
         for ingredient_data in ingredients_data:
             if len(ingredients_data) < 2:
@@ -318,7 +318,7 @@ class RecipeTestSerializer(serializers.ModelSerializer):
             RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient_data['ingredient'], amount=ingredient_data['amount'])
         recipe.tags.set(tags_data)
         return recipe
-    
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['tags'] = TagSerializer(
@@ -329,5 +329,3 @@ class RecipeTestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = '__all__'
-
-
