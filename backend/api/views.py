@@ -110,7 +110,7 @@ class UserViewSet(UserViewSet):
         author = get_object_or_404(User, pk=self.kwargs['id'])
 
         if user == author:
-            return Response({'errors': 'Нелльзя подписаться на себя'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'errors': 'Нельзя подписаться на себя'}, status=status.HTTP_400_BAD_REQUEST)
 
         if Subscription.objects.filter(user=user, author=author).exists():
             return Response({'errors': 'Вы уже подписаны'}, status=status.HTTP_400_BAD_REQUEST)
