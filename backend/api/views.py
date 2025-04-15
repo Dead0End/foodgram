@@ -196,6 +196,22 @@ class RecipeViewSet(ModelViewSet):
             'Рецепта нет в списке покупок.',
         )
 
+
+class RecipeTestViewSet(ModelViewSet):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeTestSerializer
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
+
+    @action(methods=('POST', 'DELETE'), detail=True, url_path='shopping_cart')
+    def shopping_cart(self, request, pk=None):
+        return self._handle_action(
+            request,
+            pk,
+            'shopping_cart',
+            'Рецепт уже в списке покупок.',
+            'Рецепта нет в списке покупок.',
+        )
+
     @action(
         methods=('GET',),
         detail=False,
@@ -219,9 +235,3 @@ class RecipeViewSet(ModelViewSet):
                 {'detail': 'Список покупок пуст'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-
-class RecipeTestViewSet(ModelViewSet):
-    queryset = Recipe.objects.all()
-    serializer_class = RecipeTestSerializer
-    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
