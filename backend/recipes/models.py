@@ -267,31 +267,6 @@ class Subscription(models.Model):
         return f"{self.user.username} подписан на {self.author.username}"
 
 
-class ShoppingCart(models.Model):
-    user = models.ForeignKey(
-        User,
-        verbose_name='Пользователь',
-        on_delete=models.CASCADE,
-        related_name='cart_items',
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        verbose_name='Рецепт',
-        on_delete=models.CASCADE,
-        related_name='carts',
-    )
-
-    class Meta:
-        verbose_name = 'Список покупок'
-        verbose_name_plural = 'Списки покупок'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_cart_entry',
-            )
-        ]
-
-
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
