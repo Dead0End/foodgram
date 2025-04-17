@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.core.exceptions import ValidationError
 from django.db.models import Sum
+from django.http import HttpResponse
 
 from .pagination import Pagination
 from .permissions import IsAuthorOrReadOnly
@@ -26,7 +27,8 @@ from recipes.models import (
     Ingredient,
     Recipe,
     Tag,
-    Subscription
+    Subscription,
+    ShoppingCart
 )
 
 User = get_user_model()
@@ -143,60 +145,6 @@ class UserViewSet(UserViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class RecipeViewSet(ModelViewSet):
-    queryset = Recipe.objects.all()
-    serializer_class = RecipeTestSerializer
-    filter_backends = (DjangoFilterBackend,)
-    open_actions = {'list', 'retrieve', 'get_link'}
-    authenticated_actions = {
-        'create',
-        'favorite',
-        'shopping_cart',
-        'download_shopping_cart',
-    }
-    restricted_actions = {'update', 'partial_update', 'destroy'}
-    restricted_permission = IsAuthorOrReadOnly
-
-    def handle_action(
-        self, request, pk, related_name, add_error, remove_error
-    ):
-        recipe = get_object_or_404(Recipe, id=pk)
-        user = request.user
-        related_manager = getattr(user, related_name)
-        if request.method == 'POST':
-            if related_manager.filter(id=recipe.id).exists():
-                raise ValidationError(add_error)
-            related_manager.add(recipe)
-            serializer = RecipeTestSerializer(
-                recipe, context={'request': request}
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if not related_manager.filter(id=recipe.id).exists():
-            raise ValidationError(remove_error)
-        related_manager.remove(recipe)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(methods=('POST', 'DELETE'), detail=True, url_path='favorite')
-    def favorite(self, request, pk=None):
-        return self._handle_action(
-            request,
-            pk,
-            'favorite_recipes',
-            'Рецепт уже избранном',
-            'Рецепта нет в избранном',
-        )
-
-    @action(methods=('POST', 'DELETE'), detail=True, url_path='shopping_cart')
-    def shopping_cart(self, request, pk=None):
-        return self._handle_action(
-            request,
-            pk,
-            'shopping_cart',
-            'Рецепт уже в списке покупок.',
-            'Рецепта нет в списке покупок.',
-        )
-
-
 class RecipeTestViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeTestSerializer
@@ -220,18 +168,30 @@ class RecipeTestViewSet(ModelViewSet):
     )
     def download_shopping_cart(self, request):
         user = request.user
-        shopping_cart_recipes = (
-            user.shopping_cart.prefetch_related(
-                'recipe_ingredients__ingredient'
-            )
-            .values(
-                'recipe_ingredients__ingredient__name',
-                'recipe_ingredients__ingredient__measurement_unit',
-            )
-            .annotate(total_amount=Sum('recipe_ingredients__amount'))
+        shopping_cart = ShoppingCart.objects.filter(user=user)
+        shopping_list = {}
+
+        for item in shopping_cart:
+            recipe = item.recipes
+            for ingredient in recipe.recipe_ingredients.all():
+                name = ingredient.ingredient.name
+                measurement_unit = ingredient.ingredient.measurement_unit
+                amount = ingredient.amount
+                if name in shopping_list:
+                    shopping_list[name]['amount'] += amount
+                else:
+                    shopping_list[name] = {
+                        'measurement_unit': measurement_unit,
+                        'amount': amount,
+                    }
+
+        content = '\n'.join(
+            [f"{name} ({data['measurement_unit']}) — {data['amount']}"
+             for name, data in shopping_list.items()]
         )
-        if not shopping_cart_recipes:
-            return Response(
-                {'detail': 'Список покупок пуст'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        response = HttpResponse(content, content_type='text/plain')
+        response['Content-Disposition'] = (
+            'attachment; '
+            'filename="shopping_list.txt"'
+        )
+        return response
