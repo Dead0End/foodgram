@@ -148,6 +148,11 @@ class RecipeTestViewSet(ModelViewSet):
     serializer_class = RecipeTestSerializer
     permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
 
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=[IsAuthenticated]
+    )
     def download_shopping_cart(self, request):
         user = request.user
         shopping_cart = ShoppingCart.objects.filter(user=user)
