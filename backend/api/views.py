@@ -150,22 +150,6 @@ class RecipeTestViewSet(ModelViewSet):
     serializer_class = RecipeTestSerializer
     permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
 
-    @action(methods=('POST', 'DELETE'), detail=True, url_path='shopping_cart')
-    def shopping_cart(self, request, pk=None):
-        return self._handle_action(
-            request,
-            pk,
-            'shopping_cart',
-            'Рецепт уже в списке покупок.',
-            'Рецепта нет в списке покупок.',
-        )
-
-    @action(
-        methods=('GET',),
-        detail=False,
-        url_path='download_shopping_cart',
-        permission_classes=(IsAuthenticated,),
-    )
     def download_shopping_cart(self, request):
         user = request.user
         shopping_cart = ShoppingCart.objects.filter(user=user)
