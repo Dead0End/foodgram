@@ -26,7 +26,7 @@ from recipes.models import (
     Recipe,
     Tag,
     Subscription,
-    ShoppingCart
+#    ShoppingCart
 )
 
 User = get_user_model()
