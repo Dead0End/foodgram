@@ -28,6 +28,7 @@ from recipes.models import (
     Subscription,
     ShoppingCart
 )
+from api.filters import IngredientFilter
 
 User = get_user_model()
 
@@ -40,6 +41,7 @@ class IngridientViewSet(mixins.RetrieveModelMixin,
     http_method_names = ['get']
     pagination_class = None
     filter_backends = (DjangoFilterBackend,)
+    filterset_class = IngredientFilter
     filterset_fields = ['name']
 
     def get_serializer_class(self):
