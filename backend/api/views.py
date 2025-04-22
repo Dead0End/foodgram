@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
@@ -149,6 +150,16 @@ class RecipeTestViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeTestSerializer
     permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
+
+    @action(
+        detail=True,
+        methods=['get'],
+        url_path='get=link'
+    )
+    def generate_short_link(self, request, pk=None):
+        id = get_object_or_404(Recipe, id=pk).id
+        short_link = f'{settings.SITE_DOMAIN}/s/{id}'
+        return Response({'short-link': short_link})
 
     @action(
         detail=False,
