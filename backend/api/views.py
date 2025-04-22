@@ -154,7 +154,7 @@ class RecipeTestViewSet(ModelViewSet):
     @action(
         detail=True,
         methods=['get'],
-        url_path='get=link'
+        url_path='get-link'
     )
     def generate_short_link(self, request, pk=None):
         id = get_object_or_404(Recipe, id=pk).id
