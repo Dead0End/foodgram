@@ -157,6 +157,7 @@ class RecipeTestViewSet(ModelViewSet):
         url_path='get-link'
     )
     def generate_short_link(self, request, pk=None):
+        perission_classes = [IsAuthenticated]
         id = get_object_or_404(Recipe, id=pk).id
         short_link = f'{settings.SITE_DOMAIN}/s/{id}'
         return Response({'short-link': short_link})
