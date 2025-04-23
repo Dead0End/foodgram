@@ -155,7 +155,7 @@ class RecipeTestViewSet(ModelViewSet):
         detail=True,
         methods=['get'],
         url_path='get-link',
-        perission_classes=[IsAuthenticated]
+        permission_classes=[IsAuthenticated]
 
     )
     def generate_short_link(self, request, pk=None):
