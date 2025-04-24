@@ -33,15 +33,16 @@ class UserSerializer(UserSerializer):
     avatar = Base64ImageField(required=False, allow_null=True)
     is_subscribed = serializers.SerializerMethodField()
 
-    class Meta:
-        model = CustomUser
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'avatar', 'is_subscribed']
-
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
         return request.user.follower.filter(follow=obj).exists()
+
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'avatar', 'is_subscribed']
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -123,21 +124,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     recipes_count = serializers.SerializerMethodField()
     avatar = serializers.ImageField(source='author.avatar')
 
-    class Meta:
-        model = Subscription
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
-            'recipes',
-            'recipes_count',
-            'avatar',
-        )
-        read_only_fields = fields
-
     def get_recipes_count(self, obj):
         return obj.author.recipes.count()
 
@@ -159,6 +145,21 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return AuthorRecipeSerializer(
             recipes, many=True, context={'request': request}
         ).data
+    
+    class Meta:
+        model = Subscription
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count',
+            'avatar',
+        )
+        read_only_fields = fields
 
 
 class RecipeReadSerializer(StandartRecipeSerializer):
@@ -169,10 +170,6 @@ class RecipeReadSerializer(StandartRecipeSerializer):
         queryset=Tag.objects.all(), many=True
     )
     cooking_time = serializers.IntegerField(validators=(MinValueValidator(1),))
-
-    class Meta(StandartRecipeSerializer.Meta):
-        fields = StandartRecipeSerializer.Meta.fields
-        read_only_fields = ('author',)
 
     def validate_image(self, image):
         if not image:
@@ -203,6 +200,11 @@ class RecipeReadSerializer(StandartRecipeSerializer):
         return ingredients
 
 
+    class Meta(StandartRecipeSerializer.Meta):
+        fields = StandartRecipeSerializer.Meta.fields
+        read_only_fields = ('author',)
+
+
 class FollowerSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -220,15 +222,16 @@ class AvatarSerializer(serializers.ModelSerializer):
 
 class CreateSubscribeSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = Subscription
-        fields = '__all__'
-
     def validation(self, data):
         user = self.context.get('request').user
         subscriber = data.get('subscriber')
         if user == subscriber:
             raise ValidationError('Нельзя пподписаться на самого себя')
+
+
+    class Meta:
+        model = Subscription
+        fields = '__all__'
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
