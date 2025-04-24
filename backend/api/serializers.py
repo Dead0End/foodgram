@@ -39,7 +39,6 @@ class UserSerializer(UserSerializer):
             return False
         return request.user.follower.filter(follow=obj).exists()
 
-
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'avatar', 'is_subscribed']
@@ -145,7 +144,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return AuthorRecipeSerializer(
             recipes, many=True, context={'request': request}
         ).data
-    
+
     class Meta:
         model = Subscription
         fields = (
@@ -199,7 +198,6 @@ class RecipeReadSerializer(StandartRecipeSerializer):
             )
         return ingredients
 
-
     class Meta(StandartRecipeSerializer.Meta):
         fields = StandartRecipeSerializer.Meta.fields
         read_only_fields = ('author',)
@@ -227,7 +225,6 @@ class CreateSubscribeSerializer(serializers.ModelSerializer):
         subscriber = data.get('subscriber')
         if user == subscriber:
             raise ValidationError('Нельзя пподписаться на самого себя')
-
 
     class Meta:
         model = Subscription
