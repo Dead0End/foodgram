@@ -46,6 +46,11 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     """Класс рецепта."""
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='автор'
+    )
     name = models.CharField(
         max_length=150,
         verbose_name=('Название'),
