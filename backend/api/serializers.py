@@ -307,6 +307,7 @@ class RecipeTestSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=True)
     tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
     ingredients = RecipeIngredientSerializer(many=True)
+    author = UserSerializer(read_only=True)
 
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
