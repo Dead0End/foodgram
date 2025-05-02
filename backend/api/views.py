@@ -151,6 +151,10 @@ class RecipeTestViewSet(ModelViewSet):
     serializer_class = RecipeTestSerializer
     permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
 
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+        return super().perform_create(serializer)
+
     @action(
         detail=True,
         methods=['get'],
