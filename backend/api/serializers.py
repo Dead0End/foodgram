@@ -221,6 +221,7 @@ class AvatarSerializer(serializers.ModelSerializer):
 class CreateSubscribeSerializer(serializers.ModelSerializer):
 
     def validation(self, data):
+        author = UserSerializer(read_only=True)
         user = self.context.get('request').user
         subscriber = data.get('subscriber')
         if user == subscriber:
