@@ -16,6 +16,8 @@ router.register('users', UserViewSet, basename='users')
 router.register('tags', TagViewSet, basename='tags')
 router.register('ingredients', IngridientViewSet, basename='ingredients')
 router.register('recipes', RecipeTestViewSet, basename='recipes')
+router.register(r'recipes', RecipeTestViewSet, basename='recipe')
+
 
 
 urlpatterns = [
