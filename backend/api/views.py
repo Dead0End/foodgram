@@ -20,7 +20,8 @@ from .serializers import (
     TagSerializer,
     AvatarSerializer,
     SubscriptionSerializer,
-    RecipeTestSerializer
+    RecipeTestSerializer,
+    RecipeShortSerializer
 )
 from recipes.models import (
     Ingredient,
@@ -151,10 +152,6 @@ class RecipeTestViewSet(ModelViewSet):
     serializer_class = RecipeTestSerializer
     permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-        return super().perform_create(serializer)
-
     @action(
         detail=True,
         methods=['get'],
@@ -166,6 +163,34 @@ class RecipeTestViewSet(ModelViewSet):
         id = get_object_or_404(Recipe, id=pk).id
         short_link = f'{settings.SITE_DOMAIN}/s/{id}'
         return Response({'short-link': short_link})
+
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated]
+    )
+    def shopping_cart(self, request, pk=None):
+        recipe = get_object_or_404(Recipe, id=pk)
+        user = request.user
+
+        if request.method == 'POST':
+            if ShoppingCart.objects.filter(user=user, recipes=recipe).exists():
+                return Response(
+                    {'errors': 'Рецепт уже в корзине'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            ShoppingCart.objects.create(user=user, recipes=recipe)
+            serializer = RecipeShortSerializer(recipe)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        elif request.method == 'DELETE':
+            cart_item = get_object_or_404(
+                ShoppingCart,
+                user=user,
+                recipes=recipe
+            )
+            cart_item.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
