@@ -31,7 +31,7 @@ from recipes.models import (
     ShoppingCart,
     Favourite
 )
-from api.filters import IngredientFilter, RecipeFilter
+from api.filters import IngredientFilter
 
 User = get_user_model()
 
@@ -139,7 +139,7 @@ class UserViewSet(UserViewSet):
 
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        
+
     @action(detail=False,
             methods=['get', 'delete'],
             url_path='subscriptions',
@@ -208,7 +208,7 @@ class RecipeTestViewSet(ModelViewSet):
                     {'errors': 'Нету корзины с рецептом'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-    
+
     def get_queryset(self):
         if self.request.user.is_authenticated:
             is_favorited = self.request.query_params.get('is_favorited')
@@ -257,8 +257,8 @@ class RecipeTestViewSet(ModelViewSet):
             'filename="shopping_list.txt"'
         )
         return response
-    
-    @action(detail=True, 
+
+    @action(detail=True,
             methods=["post", "delete"],
             url_path="favorite",
             permission_classes=[IsAuthenticated])
@@ -284,4 +284,3 @@ class RecipeTestViewSet(ModelViewSet):
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except Favourite.DoesNotExist:
                 return Response({'errors': 'Нет в избранном'}, status=status.HTTP_400_BAD_REQUEST)
-    
