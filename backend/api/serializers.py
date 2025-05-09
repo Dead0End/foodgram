@@ -40,7 +40,6 @@ class UserSerializer(UserSerializer):
             return False
         return request.user.follower.filter(follow=obj).exists()
 
-
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'avatar', 'is_subscribed']
