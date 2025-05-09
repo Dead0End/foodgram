@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db.models import Count, QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
 
@@ -31,7 +32,7 @@ from recipes.models import (
     ShoppingCart,
     Favourite
 )
-from api.filters import IngredientFilter
+from api.filters import IngredientFilter, RecipeFilter
 
 User = get_user_model()
 
@@ -139,7 +140,7 @@ class UserViewSet(UserViewSet):
 
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-
+        
     @action(detail=False,
             methods=['get', 'delete'],
             url_path='subscriptions',
@@ -208,7 +209,7 @@ class RecipeTestViewSet(ModelViewSet):
                     {'errors': 'Нету корзины с рецептом'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-
+    
     def get_queryset(self):
         if self.request.user.is_authenticated:
             is_favorited = self.request.query_params.get('is_favorited')
@@ -218,8 +219,8 @@ class RecipeTestViewSet(ModelViewSet):
             if bool(is_in_shopping_cart):
                 return super().get_queryset().filter(in_shopping_cart__user=self.request.user)
         if "tags" in self.request.query_params.keys():
-            tags = Tag.objects.filter(slug__in=dict(self.request.query_params)["tags"])
-            return super().get_queryset().filter(tags__in=tags)
+            recipes = Recipe.objects.filter(tags__slug__in=dict(self.request.query_params)["tags"])
+            return recipes
         return super().get_queryset()
 
     @action(
@@ -257,8 +258,8 @@ class RecipeTestViewSet(ModelViewSet):
             'filename="shopping_list.txt"'
         )
         return response
-
-    @action(detail=True,
+    
+    @action(detail=True, 
             methods=["post", "delete"],
             url_path="favorite",
             permission_classes=[IsAuthenticated])
@@ -284,3 +285,4 @@ class RecipeTestViewSet(ModelViewSet):
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except Favourite.DoesNotExist:
                 return Response({'errors': 'Нет в избранном'}, status=status.HTTP_400_BAD_REQUEST)
+    

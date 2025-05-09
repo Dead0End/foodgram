@@ -40,6 +40,8 @@ class UserSerializer(UserSerializer):
             return False
         return request.user.follower.filter(follow=obj).exists()
 
+
+
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'avatar', 'is_subscribed']
@@ -51,7 +53,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         if re.search('[!@#$%^&*()_]', username):
             raise serializers.ValidationError('Не проходит шаблон')
         return username
-
+    
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password']
@@ -175,6 +177,7 @@ class RecipeReadSerializer(StandartRecipeSerializer):
         queryset=Tag.objects.all(), many=True
     )
     cooking_time = serializers.IntegerField(validators=(MinValueValidator(1),))
+
 
     def validate_image(self, image):
         if not image:
@@ -327,8 +330,8 @@ class RecipeTestSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.request = kwargs.get('context').get('request')
-
+        self.request=kwargs.get('context').get('request')
+    
     def create(self, validated_data):
         try:
             ingredients_data = validated_data.pop('ingredients')
@@ -344,7 +347,7 @@ class RecipeTestSerializer(serializers.ModelSerializer):
         if not tags_data:
             raise serializers.ValidationError('Нету тегов')
         if len(list(tags_data)) != len(set(tags_data)):
-            raise serializers.ValidationError('Теги повторяются')
+                raise serializers.ValidationError('Теги повторяются')
         recipe = Recipe.objects.create(**validated_data, author=self.request.user)
         recipe.tags.set(tags_data)
         ids = []
@@ -385,6 +388,7 @@ class RecipeTestSerializer(serializers.ModelSerializer):
         recipe.tags.set(tags_data)
         recipe.save()
         return super().update(instance=instance, validated_data=validated_data)
+                
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

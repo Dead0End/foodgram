@@ -24,14 +24,14 @@ class Command(BaseCommand):
                     try:
                         tag = Tag(
                             name=row[0],
-                            slug=row[0]
+                            slug=row[1]
                         )
                         tag.save()
                         imported_tags.append({
                             tag.name,
                             tag.slug,
                         })
-                        self.stdout.write(self.style.SUCCESS(f'Успешно импортирован ингредиент: {tag.name}'))
+                        self.stdout.write(self.style.SUCCESS(f'Успешно импортирован тег: {tag.name}'))
                     except ValidationError as e:
                         self.stdout.write(self.style.ERROR(f"Ошибка валидации строки {row}: {e}"))
                     except Exception as e:
@@ -41,4 +41,4 @@ class Command(BaseCommand):
         except Exception as e:
             raise CommandError(f'Ошибка при открытии файла: {e}')
 
-        self.stdout.write(self.style.SUCCESS(f'Импортированные ингредиенты: {imported_tags}'))
+        self.stdout.write(self.style.SUCCESS(f'Импортированные теги: {imported_tags}'))
