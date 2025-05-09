@@ -384,7 +384,7 @@ class RecipeTestSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Теги повторяются')
         recipe.tags.set(tags_data)
         recipe.save()
-        return super().update(instance=instance, validated_data=validated_data)       
+        return super().update(instance=instance, validated_data=validated_data)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
