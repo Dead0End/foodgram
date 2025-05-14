@@ -124,10 +124,11 @@ class UserViewSet(UserViewSet):
                     status=status.HTTP_400_BAD_REQUEST)
 
             if Subscription.objects.filter(
-                user=user, author=author).exists():
+                    user=user, author=author).exists():
                 return Response(
                     {'errors': 'Вы уже подписаны'},
-                    status=status.HTTP_400_BAD_REQUEST)
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             try:
                 subscription = Subscription.objects.create(
