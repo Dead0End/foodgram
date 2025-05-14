@@ -27,7 +27,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'first_name', 'last_name', 'email',]
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', ]
 
 
 class UserSerializer(UserSerializer):
@@ -42,7 +42,13 @@ class UserSerializer(UserSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'avatar', 'is_subscribed']
+        fields = ['id',
+                  'username',
+                  'first_name',
+                  'last_name',
+                  'email',
+                  'avatar',
+                  'is_subscribed']
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -54,7 +60,12 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password']
+        fields = ['id',
+                  'username',
+                  'first_name',
+                  'last_name',
+                  'email',
+                  'password']
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -174,7 +185,8 @@ class RecipeReadSerializer(StandartRecipeSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True
     )
-    cooking_time = serializers.IntegerField(validators=(MinValueValidator(1),))
+    cooking_time = serializers.IntegerField(
+        validators=(MinValueValidator(1),))
 
     def validate_image(self, image):
         if not image:
@@ -189,7 +201,8 @@ class RecipeReadSerializer(StandartRecipeSerializer):
                 'поставьте минимум один тег'
             )
         if len(tags) != len(set(tags)):
-            raise serializers.ValidationError('Не может быть двух одинаковых тегов')
+            raise serializers.ValidationError(
+                'Не может быть двух одинаковых тегов')
         return tags
 
     def validate_ingredients(self, ingredients):
@@ -248,7 +261,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True
     )
-    cooking_time = serializers.IntegerField(validators=(MinValueValidator(1),))
+    cooking_time = serializers.IntegerField(
+        validators=(MinValueValidator(1),))
 
     class Meta(AuthorRecipeSerializer.Meta):
         fields = AuthorRecipeSerializer.Meta.fields
@@ -266,7 +280,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 'поставьте минимум один тег'
             )
         if len(tags) != len(set(tags)):
-            raise serializers.ValidationError('Не может быть двух одинаковых тегов')
+            raise serializers.ValidationError(
+                'Не может быть двух одинаковых тегов')
         return tags
 
     def validate_ingredients(self, ingredients):
@@ -309,10 +324,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(source='ingredient', queryset=Ingredient.objects.all())
+    id = serializers.PrimaryKeyRelatedField(
+        source='ingredient', queryset=Ingredient.objects.all())
     amount = serializers.IntegerField(required=True)
-    name = serializers.StringRelatedField(source='ingredient.name', required=False)
-    measurement_unit = serializers.StringRelatedField(source='ingredient.measurement_unit', required=False)
+    name = serializers.StringRelatedField(
+        source='ingredient.name', required=False)
+    measurement_unit = serializers.StringRelatedField(
+        source='ingredient.measurement_unit', required=False)
 
     class Meta:
         model = RecipeIngredient
@@ -321,7 +339,8 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class RecipeTestSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=True)
-    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True)
     ingredients = RecipeIngredientSerializer(many=True)
     author = UserSerializer(read_only=True)
 
@@ -345,7 +364,8 @@ class RecipeTestSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Нету тегов')
         if len(list(tags_data)) != len(set(tags_data)):
             raise serializers.ValidationError('Теги повторяются')
-        recipe = Recipe.objects.create(**validated_data, author=self.request.user)
+        recipe = Recipe.objects.create(**validated_data,
+                                       author=self.request.user)
         recipe.tags.set(tags_data)
         ids = []
         for ingredient_data in ingredients_data:
@@ -354,7 +374,10 @@ class RecipeTestSerializer(serializers.ModelSerializer):
             if ingredient_data['ingredient'].pk in ids:
                 raise serializers.ValidationError('Ингридиенты повторяются')
             ids.append(ingredient_data['ingredient'].pk)
-            RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient_data['ingredient'], amount=ingredient_data['amount'])
+            RecipeIngredient.objects.create(
+                recipe=recipe,
+                ingredient=ingredient_data['ingredient'],
+                amount=ingredient_data['amount'])
         recipe.save()
         return recipe
 
@@ -377,14 +400,18 @@ class RecipeTestSerializer(serializers.ModelSerializer):
             if ingredient_data['ingredient'].pk in ids:
                 raise serializers.ValidationError('Ингридиенты повторяются')
             ids.append(ingredient_data['ingredient'].pk)
-            RecipeIngredient.objects.create(recipe=recipe, ingredient=ingredient_data['ingredient'], amount=ingredient_data['amount'])
+            RecipeIngredient.objects.create(
+                recipe=recipe,
+                ingredient=ingredient_data['ingredient'],
+                amount=ingredient_data['amount'])
         if not tags_data:
             raise serializers.ValidationError('Нету тегов')
         if len(list(tags_data)) != len(set(tags_data)):
             raise serializers.ValidationError('Теги повторяются')
         recipe.tags.set(tags_data)
         recipe.save()
-        return super().update(instance=instance, validated_data=validated_data)
+        return super().update(
+            instance=instance, validated_data=validated_data)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -392,8 +419,12 @@ class RecipeTestSerializer(serializers.ModelSerializer):
             instance.tags.all(), many=True
         ).data
         if self.request.user.is_authenticated:
-            representation['is_favorited'] = Favourite.objects.filter(user=self.request.user, recipe=instance).exists()
-            representation['is_in_shopping_cart'] = ShoppingCart.objects.filter(user=self.request.user, recipes=instance).exists()
+            representation[
+                'is_favorited'] = Favourite.objects.filter(
+                user=self.request.user, recipe=instance).exists()
+            representation[
+                'is_in_shopping_cart'] = ShoppingCart.objects.filter(
+                user=self.request.user, recipes=instance).exists()
         else:
             representation['is_favorited'] = False
             representation['is_in_shopping_cart'] = False

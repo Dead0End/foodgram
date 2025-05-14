@@ -3,7 +3,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from django.conf import settings
@@ -64,7 +65,9 @@ class TagViewSet(mixins.RetrieveModelMixin,
     @action(detail=False, url_path='me')
     def anonymous_tags(self, request):
         if request.user.is_anonymous:
-            return Response({'detail': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {'detail': 'Unauthorized'},
+                status=status.HTTP_401_UNAUTHORIZED)
         serializer = self.serializer_class(request.user)
         return Response(serializer.data)
 
@@ -105,7 +108,8 @@ class UserViewSet(UserViewSet):
     @action(detail=False, url_path='me')
     def anonymous_me(self, request):
         if request.user.is_anonymous:
-            return Response({'detail': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'detail': 'Unauthorized'},
+                            status=status.HTTP_401_UNAUTHORIZED)
         serializer = self.serializer_class(request.user)
         return Response(serializer.data)
 
@@ -115,21 +119,31 @@ class UserViewSet(UserViewSet):
         author = get_object_or_404(User, pk=self.kwargs['id'])
         if request.method == "POST":
             if user == author:
-                return Response({'errors': 'Нельзя подписаться на себя'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'errors': 'Нельзя подписаться на себя'},
+                    status=status.HTTP_400_BAD_REQUEST)
 
-            if Subscription.objects.filter(user=user, author=author).exists():
-                return Response({'errors': 'Вы уже подписаны'}, status=status.HTTP_400_BAD_REQUEST)
+            if Subscription.objects.filter(
+                user=user, author=author).exists():
+                return Response(
+                    {'errors': 'Вы уже подписаны'},
+                    status=status.HTTP_400_BAD_REQUEST)
 
             try:
-                subscription = Subscription.objects.create(user=user, author=author)
+                subscription = Subscription.objects.create(
+                    user=user, author=author)
                 serializer = SubscriptionSerializer(subscription)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED)
             except Exception as e:
                 print(f"Ошибка при создании подписки: {e}")
-                return Response({'errors': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response(
+                    {'errors': str(e)},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             author = get_object_or_404(User, pk=self.kwargs['id'])
-            subscription = Subscription.objects.filter(user=request.user, author=author)
+            subscription = Subscription.objects.filter(
+                user=request.user, author=author)
 
             if not subscription.exists():
                 return Response(
@@ -186,7 +200,8 @@ class RecipeTestViewSet(ModelViewSet):
         user = request.user
 
         if request.method == 'POST':
-            if ShoppingCart.objects.filter(user=user, recipes=recipe).exists():
+            if ShoppingCart.objects.filter(
+                user=user, recipes=recipe).exists():
                 return Response(
                     {'errors': 'Рецепт уже в корзине'},
                     status=status.HTTP_400_BAD_REQUEST
@@ -212,13 +227,17 @@ class RecipeTestViewSet(ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_authenticated:
             is_favorited = self.request.query_params.get('is_favorited')
-            is_in_shopping_cart = self.request.query_params.get('is_in_shopping_cart')
+            is_in_shopping_cart = self.request.query_params.get(
+                'is_in_shopping_cart')
             if bool(is_favorited):
-                return super().get_queryset().filter(favourite__user=self.request.user)
+                return super().get_queryset().filter(
+                    favourite__user=self.request.user)
             if bool(is_in_shopping_cart):
-                return super().get_queryset().filter(in_shopping_cart__user=self.request.user)
+                return super().get_queryset().filter(
+                    in_shopping_cart__user=self.request.user)
         if "tags" in self.request.query_params.keys():
-            recipes = Recipe.objects.filter(tags__slug__in=dict(self.request.query_params)["tags"])
+            recipes = Recipe.objects.filter(
+                tags__slug__in=dict(self.request.query_params)["tags"])
             return recipes
         return super().get_queryset()
 
@@ -266,9 +285,12 @@ class RecipeTestViewSet(ModelViewSet):
         try:
             recipe = Recipe.objects.get(pk=pk)
         except Recipe.DoesNotExist:
-            return Response({'errors': 'Нету такого рецепта'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {'errors': 'Нету такого рецепта'},
+                status=status.HTTP_404_NOT_FOUND)
         if request.method == "POST":
-            favourite, created = Favourite.objects.get_or_create(user=request.user, recipe=recipe)
+            favourite, created = Favourite.objects.get_or_create(
+                user=request.user, recipe=recipe)
             if not created:
                 return Response(
                     {'errors': 'Уже в избранном'},
@@ -276,11 +298,17 @@ class RecipeTestViewSet(ModelViewSet):
                 )
             else:
                 serializer = RecipeShortSerializer(recipe)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_201_CREATED)
         else:
             try:
-                favourite = Favourite.objects.get(user=request.user, recipe=recipe)
+                favourite = Favourite.objects.get(
+                    user=request.user,
+                    recipe=recipe)
                 favourite.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
             except Favourite.DoesNotExist:
-                return Response({'errors': 'Нет в избранном'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'errors': 'Нет в избранном'},
+                    status=status.HTTP_400_BAD_REQUEST)

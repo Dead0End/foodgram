@@ -10,7 +10,8 @@ class Command(BaseCommand):
     help = 'Импортирует ингредиенты из CSV файла'
 
     def add_arguments(self, parser):
-        parser.add_argument('csv_file', type=str, help='Путь к CSV файлу с ингредиентами')
+        parser.add_argument(
+            'csv_file', type=str, help='Путь к CSV файлу с ингредиентами')
 
     def handle(self, *args, **options):
         csv_file_path = options['csv_file']
@@ -31,14 +32,18 @@ class Command(BaseCommand):
                             tag.name,
                             tag.slug,
                         })
-                        self.stdout.write(self.style.SUCCESS(f'Успешно импортирован тег: {tag.name}'))
+                        self.stdout.write(self.style.SUCCESS(
+                            f'Успешно импортирован тег: {tag.name}'))
                     except ValidationError as e:
-                        self.stdout.write(self.style.ERROR(f"Ошибка валидации строки {row}: {e}"))
+                        self.stdout.write(self.style.ERROR(
+                            f"Ошибка валидации строки {row}: {e}"))
                     except Exception as e:
-                        self.stdout.write(self.style.ERROR(f"Ошибка обработки строки {row}: {e}"))
+                        self.stdout.write(self.style.ERROR(
+                            f"Ошибка обработки строки {row}: {e}"))
         except FileNotFoundError:
             raise CommandError(f'Файл "{csv_file_path}" не найден.')
         except Exception as e:
             raise CommandError(f'Ошибка при открытии файла: {e}')
 
-        self.stdout.write(self.style.SUCCESS(f'Импортированные теги: {imported_tags}'))
+        self.stdout.write(
+            self.style.SUCCESS(f'Импортированные теги: {imported_tags}'))
