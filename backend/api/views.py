@@ -201,7 +201,7 @@ class RecipeTestViewSet(ModelViewSet):
 
         if request.method == 'POST':
             if ShoppingCart.objects.filter(
-                user=user, recipes=recipe).exists():
+                    user=user, recipes=recipe).exists():
                 return Response(
                     {'errors': 'Рецепт уже в корзине'},
                     status=status.HTTP_400_BAD_REQUEST

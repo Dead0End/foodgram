@@ -17,8 +17,7 @@ class Command(BaseCommand):
         imported_ingredients = []
 
         try:
-            with open(
-                csv_file_path, mode='r', encoding='utf-8') as csvfile:
+            with open(csv_file_path, mode='r', encoding='utf-8') as csvfile:
                 reader = csv.reader(csvfile)
                 for row in reader:
                     try:
