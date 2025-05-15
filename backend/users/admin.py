@@ -2,8 +2,9 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
 
-from users.models import Follower, CustomUser
-from recipes.models import Recipe, Ingredient, Tag
+from users.models import CustomUser, Follower, Subscription
+from recipes.models import (Recipe, Ingredient, Tag, Favourite, 
+                          ShoppingList, RecipeIngredient, ShoppingCart)
 
 
 @admin.register(CustomUser)
@@ -31,20 +32,28 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(Follower)
 class FollowerAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'following')
+    list_display = ('id', 'user', 'follow')
     list_display_links = ('id', 'user')
-    search_fields = ('user__username', 'following__username')
+    search_fields = ('user__username', 'follow__username')
+    list_per_page = 25
+
+
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'author')
+    list_display_links = ('id', 'user')
+    search_fields = ('user__username', 'author__username')
     list_per_page = 25
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'author', 'favorites_count', 'created_at')
+    list_display = ('id', 'name', 'author', 'favorites_count', 'cooking_time')
     list_display_links = ('id', 'name')
     search_fields = ('name', 'author__username', 'author__email')
     list_filter = ('tags',)
     filter_horizontal = ('tags',)
-    readonly_fields = ('favorites_count', 'created_at')
+    readonly_fields = ('favorites_count',)
     list_per_page = 25
 
     def get_queryset(self, request):
@@ -72,4 +81,36 @@ class TagAdmin(admin.ModelAdmin):
     list_display_links = ('id', 'name')
     search_fields = ('name', 'slug')
     prepopulated_fields = {'slug': ('name',)}
+    list_per_page = 25
+
+
+@admin.register(Favourite)
+class FavouriteAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'recipe')
+    list_display_links = ('id', 'user')
+    search_fields = ('user__username', 'recipe__name')
+    list_per_page = 25
+
+
+@admin.register(ShoppingList)
+class ShoppingListAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'recipe')
+    list_display_links = ('id', 'user')
+    search_fields = ('user__username', 'recipe__name')
+    list_per_page = 25
+
+
+@admin.register(RecipeIngredient)
+class RecipeIngredientAdmin(admin.ModelAdmin):
+    list_display = ('id', 'recipe', 'ingredient', 'amount')
+    list_display_links = ('id', 'recipe')
+    search_fields = ('recipe__name', 'ingredient__name')
+    list_per_page = 25
+
+
+@admin.register(ShoppingCart)
+class ShoppingCartAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'recipes')
+    list_display_links = ('id', 'user')
+    search_fields = ('user__username', 'recipes__name')
     list_per_page = 25
