@@ -30,8 +30,19 @@ class CustomUserAdmin(UserAdmin):
     list_per_page = 25
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'email', 'avatar')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Personal info',
+         {'fields': (
+             'first_name',
+             'last_name',
+             'email',
+             'avatar')}),
+        ('Permissions',
+         {'fields': (
+             'is_active',
+             'is_staff',
+             'is_superuser',
+             'groups',
+             'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
 
