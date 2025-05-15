@@ -3,8 +3,13 @@ from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
 
 from users.models import CustomUser, Follower, Subscription
-from recipes.models import (Recipe, Ingredient, Tag, Favourite, 
-                          ShoppingList, RecipeIngredient, ShoppingCart)
+from recipes.models import (Recipe,
+                            Ingredient,
+                            Tag,
+                            Favourite,
+                            ShoppingList,
+                            RecipeIngredient,
+                            ShoppingCart)
 
 
 @admin.register(CustomUser)
