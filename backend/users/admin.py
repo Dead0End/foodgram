@@ -2,14 +2,15 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
 
-from users.models import CustomUser, Follower, Subscription
+from users.models import CustomUser, Follower
 from recipes.models import (Recipe,
                             Ingredient,
                             Tag,
                             Favourite,
                             ShoppingList,
                             RecipeIngredient,
-                            ShoppingCart)
+                            ShoppingCart,
+                            Subscription)
 
 
 @admin.register(CustomUser)
@@ -82,7 +83,7 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'color', 'slug')
+    list_display = ('id', 'name', 'slug')
     list_display_links = ('id', 'name')
     search_fields = ('name', 'slug')
     prepopulated_fields = {'slug': ('name',)}
