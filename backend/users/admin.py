@@ -4,7 +4,6 @@ from django.db.models import Count
 from django.contrib.auth import get_user_model
 
 
-from users.models import CustomUser, Follower
 from recipes.models import (Recipe,
                             Ingredient,
                             Tag,
