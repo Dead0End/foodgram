@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
+from django.contrib.auth import get_user_model
+
 
 from users.models import CustomUser, Follower
 from recipes.models import (Recipe,
@@ -12,8 +14,9 @@ from recipes.models import (Recipe,
                             ShoppingCart,
                             Subscription)
 
+User = get_user_model()
 
-@admin.register(CustomUser)
+@admin.register(User)
 class CustomUserAdmin(UserAdmin):
     list_display = (
         'id',
@@ -24,9 +27,9 @@ class CustomUserAdmin(UserAdmin):
         'avatar'
     )
     list_display_links = ('id', 'username')
-    search_fields = ('username', 'email')
+    search_fields = ('username', 'email', 'first_name', 'last_name')
     list_filter = ('is_staff', 'is_active', 'is_superuser')
-    ordering = ('id',)
+    ordering = ('username',)
     list_per_page = 25
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
@@ -47,7 +50,7 @@ class CustomUserAdmin(UserAdmin):
     )
 
 
-@admin.register(Follower)
+@admin.register(User)
 class FollowerAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'follow')
     list_display_links = ('id', 'user')
@@ -77,10 +80,12 @@ class RecipeAdmin(admin.ModelAdmin):
         queryset = super().get_queryset(request)
         return queryset.annotate(favorites_count=Count('favourite'))
 
+    @admin.display(
+        description='В избранном',
+        ordering='favorites_count'
+    )
     def favorites_count(self, obj):
         return obj.favorites_count
-    favorites_count.short_description = 'В избранном'
-    favorites_count.admin_order_field = 'favorites_count'
 
 
 @admin.register(Ingredient)
