@@ -26,9 +26,9 @@ class UserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
-        return (request is not None and
-                request.user.is_authenticated and
-                request.user.follower.filter(follow=obj).exists())
+        return (request is not None
+                and request.user.is_authenticated
+                and request.user.follower.filter(follow=obj).exists())
 
     class Meta:
         model = CustomUser
@@ -179,13 +179,15 @@ class CreateSubscribeSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
-    id=serializers.PrimaryKeyRelatedField(
+    id = serializers.PrimaryKeyRelatedField(
         source='ingredient', queryset=Ingredient.objects.all())
-    amount=serializers.IntegerField(required=True)
-    name=serializers.StringRelatedField(read_only = True,
-        source='ingredient.name', required=False)
-    measurement_unit=serializers.StringRelatedField(
-        read_only = True,
+    amount = serializers.IntegerField(required=True)
+    name = serializers.StringRelatedField(
+        read_only=True,
+        source='ingredient.name',
+        required=False)
+    measurement_unit = serializers.StringRelatedField(
+        read_only=True,
         source='ingredient.measurement_unit',
         required=False)
 
@@ -212,7 +214,7 @@ class RecipeTestSerializer(serializers.ModelSerializer):
         if not tags:
             raise serializers.ValidationError({'tags': 'Необходимо указать хотя бы один тег'})
         if len(tags) != len(set(tag.id for tag in tags)):
-            raise serializers.ValidationError({'tags': 'Теги не должны повторяться'})        
+            raise serializers.ValidationError({'tags': 'Теги не должны повторяться'})
         ingredients = data.get('ingredients', [])
         if not ingredients:
             raise serializers.ValidationError({'ingredients': 'Необходимо указать хотя бы один ингредиент'})
@@ -230,12 +232,11 @@ class RecipeTestSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
         tags_data = validated_data.pop('tags')
-        
         recipe = Recipe.objects.create(
             **validated_data,
             author=self.context['request'].user
-        )        
-        recipe.tags.set(tags_data)        
+        )
+        recipe.tags.set(tags_data)
         recipe_ingredients = [
             RecipeIngredient(
                 recipe=recipe,
@@ -245,15 +246,14 @@ class RecipeTestSerializer(serializers.ModelSerializer):
             for ingredient_data in ingredients_data
         ]
         RecipeIngredient.objects.bulk_create(recipe_ingredients)
-        
         return recipe
 
     @transaction.atomic
     def update(self, instance, validated_data):
         ingredients_data = validated_data.pop('ingredients')
-        tags_data = validated_data.pop('tags')        
-        instance = super().update(instance, validated_data)        
-        instance.tags.set(tags_data)        
+        tags_data = validated_data.pop('tags')
+        instance = super().update(instance, validated_data)
+        instance.tags.set(tags_data)
         instance.ingredients.clear()
         recipe_ingredients = [
             RecipeIngredient(
@@ -282,10 +282,6 @@ class RecipeTestSerializer(serializers.ModelSerializer):
             representation['is_favorited'] = False
             representation['is_in_shopping_cart'] = False
         return representation
-
-    class Meta:
-        model = Recipe
-        fields = '__all__'
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
