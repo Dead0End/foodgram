@@ -1,4 +1,4 @@
-from rest_framework import status, mixins, viewsets
+from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -97,12 +97,10 @@ class UserViewSet(UserViewSet):
                 return Response(
                     {'errors': 'Нельзя подписаться на себя'},
                     status=status.HTTP_400_BAD_REQUEST)
-
             if not created:
                 return Response(
-                {'errors': 'Вы уже подписаны на этого пользователя'},
-                status=status.HTTP_400_BAD_REQUEST
-                )
+                    {'errors': 'Вы уже подписаны на этого пользователя'},
+                    status=status.HTTP_400_BAD_REQUEST)
 
             try:
                 subscription = Subscription.objects.create(

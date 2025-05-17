@@ -16,6 +16,7 @@ from recipes.models import (Recipe,
 
 User = get_user_model()
 
+
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     list_display = (
