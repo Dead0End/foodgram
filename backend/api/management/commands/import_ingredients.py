@@ -1,6 +1,5 @@
 import csv
 
-from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 
 from recipes.models import Ingredient
@@ -36,13 +35,12 @@ class Command(BaseCommand):
                 ingredients_to_create,
                 ignore_conflicts=True
             )
-            
             self.stdout.write(
                 self.style.SUCCESS(
                     f'Успешно импортировано {len(created)} ингредиентов'))
 
         except FileNotFoundError:
             raise CommandError(f'Файл "{csv_file_path}" не найден. '
-                             'Убедитесь, что файл ingredients.csv находится в директории data/')
+                                'Убедитесь, что файл ingredients.csv находится в директории data/')
         except Exception as e:
             raise CommandError(f'Ошибка при импорте: {e}')
