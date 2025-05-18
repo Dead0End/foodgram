@@ -1,45 +1,47 @@
 import csv
 
 from django.core.management.base import BaseCommand, CommandError
-
 from recipes.models import Ingredient
+from django.core.exceptions import ValidationError
 
 
 class Command(BaseCommand):
-    help = 'Импортирует ингредиенты из CSV файла ingredients.csv'
+    help = 'Импортирует ингредиенты из CSV файла'
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            'csv_file', type=str, help='Путь к CSV файлу с ингредиентами')
 
     def handle(self, *args, **options):
-        csv_file_path = 'backend/data/ingredients.csv'
-        ingredients_to_create = []
+        csv_file_path = options['csv_file']
+        imported_ingredients = []
 
         try:
             with open(csv_file_path, mode='r', encoding='utf-8') as csvfile:
                 reader = csv.reader(csvfile)
                 for row in reader:
                     try:
-                        ingredients_to_create.append(
-                            Ingredient(
-                                name=row[0],
-                                measurement_unit=row[1]
-                            )
+                        ingredient = Ingredient(
+                            name=row[0],
+                            measurement_unit=row[1]
                         )
-                    except IndexError:
+                        ingredient.save()
+                        imported_ingredients.append({
+                            ingredient.id,
+                            ingredient.name,
+                            ingredient.measurement_unit
+                        })
+                    except ValidationError as e:
                         self.stdout.write(self.style.ERROR(
-                            f"Некорректный формат строки: {row}"))
-                        continue
+                            f"Ошибка валидации строки {row}: {e}"))
                     except Exception as e:
                         self.stdout.write(self.style.ERROR(
                             f"Ошибка обработки строки {row}: {e}"))
-                        continue
-            created = Ingredient.objects.bulk_create(
-                ingredients_to_create,
-                ignore_conflicts=True
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f'Успешно импортировано {len(created)} ингредиентов'))
-
         except FileNotFoundError:
-            raise CommandError(f'Файл "{csv_file_path}" не найден. Убедитесь, что файл ingredients.csv находится в директории data/')
+            raise CommandError(f'Файл "{csv_file_path}" не найден.')
         except Exception as e:
-            raise CommandError(f'Ошибка при импорте: {e}')
+            raise CommandError(f'Ошибка при открытии файла: {e}')
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f'Импортированные ингредиенты: {imported_ingredients}'))

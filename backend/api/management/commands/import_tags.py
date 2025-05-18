@@ -1,13 +1,13 @@
 import csv
 
-from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
-
 from recipes.models import Tag
+
+from django.core.exceptions import ValidationError
 
 
 class Command(BaseCommand):
-    help = 'Импортирует тэги из CSV файла'
+    help = 'Импортирует ингредиенты из CSV файла'
 
     def add_arguments(self, parser):
         parser.add_argument(
