@@ -5,6 +5,7 @@ from recipes.models import Ingredient, Recipe, Tag
 
 User = get_user_model()
 
+
 class IngredientFilter(FilterSet):
     name = filters.CharFilter(
         field_name='name',
