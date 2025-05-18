@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from recipes.models import (Recipe,
                             Ingredient,
                             Tag,
-                            Favourite,
+                            Favorite,
                             ShoppingList,
                             RecipeIngredient,
                             ShoppingCart,
@@ -106,7 +106,7 @@ class TagAdmin(admin.ModelAdmin):
     list_per_page = 25
 
 
-@admin.register(Favourite)
+@admin.register(Favorite)
 class FavouriteAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     list_display_links = ('id', 'user')
