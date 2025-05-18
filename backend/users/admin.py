@@ -124,7 +124,7 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'recipes')
+    list_display = ('id', 'user', 'recipe')
     list_display_links = ('id', 'user')
-    search_fields = ('user__username', 'recipes__name')
+    search_fields = ('user__username', 'recipe__name')  # Also changed here
     list_per_page = 25

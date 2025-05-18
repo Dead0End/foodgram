@@ -118,7 +118,7 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ('-created_at',)
+        ordering = ('name',)
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         default_related_name = 'recipes'
@@ -237,11 +237,13 @@ class Subscription(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='Подписчик',
+        related_name='follower_subscriptions'  # Changed
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор',
+        related_name='author_subscriptions'  # Changed
     )
 
     class Meta:
