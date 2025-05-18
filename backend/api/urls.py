@@ -4,7 +4,7 @@ from django.urls import path, include, re_path
 from api.views import (
     IngridientViewSet,
     TagViewSet,
-    CustomUserViewSet,
+    UserViewSet,
     RecipeTestViewSet
 )
 
@@ -12,7 +12,7 @@ app_name = 'api'
 
 router = routers.DefaultRouter()
 
-router.register('users', CustomUserViewSet, basename='users')
+router.register('users', UserViewSet, basename='users')
 router.register('tags', TagViewSet, basename='tags')
 router.register('ingredients', IngridientViewSet, basename='ingredients')
 router.register('recipes', RecipeTestViewSet, basename='recipes')

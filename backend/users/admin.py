@@ -1,19 +1,16 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
-from django.contrib.auth import get_user_model
 
-from users.models import CustomUser
+from users.models import CustomUser, Follower
 from recipes.models import (Recipe,
                             Ingredient,
                             Tag,
-                            Favorite,
+                            Favourite,
                             ShoppingList,
                             RecipeIngredient,
                             ShoppingCart,
                             Subscription)
-
-User = get_user_model()
 
 
 @admin.register(CustomUser)
@@ -27,9 +24,9 @@ class CustomUserAdmin(UserAdmin):
         'avatar'
     )
     list_display_links = ('id', 'username')
-    search_fields = ('username', 'email', 'first_name', 'last_name')
+    search_fields = ('username', 'email')
     list_filter = ('is_staff', 'is_active', 'is_superuser')
-    ordering = ('username',)
+    ordering = ('id',)
     list_per_page = 25
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
@@ -48,6 +45,14 @@ class CustomUserAdmin(UserAdmin):
              'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
+
+
+@admin.register(Follower)
+class FollowerAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'follow')
+    list_display_links = ('id', 'user')
+    search_fields = ('user__username', 'follow__username')
+    list_per_page = 25
 
 
 @admin.register(Subscription)
@@ -72,12 +77,10 @@ class RecipeAdmin(admin.ModelAdmin):
         queryset = super().get_queryset(request)
         return queryset.annotate(favorites_count=Count('favourite'))
 
-    @admin.display(
-        description='В избранном',
-        ordering='favorites_count'
-    )
     def favorites_count(self, obj):
         return obj.favorites_count
+    favorites_count.short_description = 'В избранном'
+    favorites_count.admin_order_field = 'favorites_count'
 
 
 @admin.register(Ingredient)
@@ -98,7 +101,7 @@ class TagAdmin(admin.ModelAdmin):
     list_per_page = 25
 
 
-@admin.register(Favorite)
+@admin.register(Favourite)
 class FavouriteAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     list_display_links = ('id', 'user')
@@ -124,7 +127,7 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'recipe')
+    list_display = ('id', 'user', 'recipes')
     list_display_links = ('id', 'user')
-    search_fields = ('user__username', 'recipe__name')  # Also changed here
+    search_fields = ('user__username', 'recipes__name')
     list_per_page = 25

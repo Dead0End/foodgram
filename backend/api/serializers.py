@@ -75,8 +75,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'name',
             'image',
             'text',
-            'cooking_time',
-            'created_at'
+            'cooking_time'
         )
 
 
