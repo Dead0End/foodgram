@@ -17,7 +17,6 @@ from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     UserSerializer,
     IngridientSerializer,
-    IngridientCreateSerializer,
     TagSerializer,
     AvatarSerializer,
     SubscriptionSerializer,
@@ -49,8 +48,6 @@ class IngridientViewSet(mixins.RetrieveModelMixin,
     filterset_fields = ['name']
 
     def get_serializer_class(self):
-        if self.action in ['create']:
-            return IngridientCreateSerializer
         return IngridientSerializer
 
 

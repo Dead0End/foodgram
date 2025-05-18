@@ -44,23 +44,6 @@ class UserSerializer(UserSerializer):
                   'is_subscribed']
 
 
-class CustomUserCreateSerializer(UserCreateSerializer):
-    def validate_username(self, username):
-        import re
-        if re.search('[!@#$%^&*()_]', username):
-            raise serializers.ValidationError('Не проходит шаблон')
-        return username
-
-    class Meta:
-        model = CustomUser
-        fields = ['id',
-                  'username',
-                  'first_name',
-                  'last_name',
-                  'email',
-                  'password']
-
-
 class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -82,7 +65,7 @@ class IngridientSerializer(serializers.ModelSerializer):
             'measurement_unit')
 
 
-class StandartRecipeSerializer(serializers.ModelSerializer):
+class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = (
@@ -97,7 +80,7 @@ class StandartRecipeSerializer(serializers.ModelSerializer):
         )
 
 
-class AuthorRecipeSerializer(serializers.ModelSerializer):
+class BasicRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecipeUser
         fields = (
@@ -115,11 +98,6 @@ class AuthorRecipeSerializer(serializers.ModelSerializer):
             'password',
             'author'
         )
-
-
-class IngridientCreateSerializer(IngridientSerializer):
-    class Meta(IngridientSerializer.Meta):
-        fields = ['name', 'measurement_unit']
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -151,7 +129,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             except ValueError:
                 pass
 
-        return AuthorRecipeSerializer(
+        return BasicRecipeSerializer(
             recipes, many=True, context={'request': request}
         ).data
 
@@ -171,7 +149,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class RecipeReadSerializer(StandartRecipeSerializer):
+class RecipeReadSerializer(RecipeSerializer):
     author = UserSerializer(read_only=True)
     image = Base64ImageField(required=True)
     ingredients = IngridientSerializer(many=True)
@@ -214,8 +192,8 @@ class RecipeReadSerializer(StandartRecipeSerializer):
         representation = super().to_representation(instance).data
         return representation
 
-    class Meta(StandartRecipeSerializer.Meta):
-        fields = StandartRecipeSerializer.Meta.fields
+    class Meta(RecipeSerializer.Meta):
+        fields = RecipeSerializer.Meta.fields
         read_only_fields = ('author',)
 
 
@@ -257,8 +235,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     cooking_time = serializers.IntegerField(
         validators=(MinValueValidator(1),))
 
-    class Meta(AuthorRecipeSerializer.Meta):
-        fields = AuthorRecipeSerializer.Meta.fields
+    class Meta(BasicRecipeSerializer.Meta):
+        fields = BasicRecipeSerializer.Meta.fields
 
     def validate_image(self, image):
         if not image:
