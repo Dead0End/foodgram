@@ -7,7 +7,7 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from recipes.models import (
-    Favourite,
+    Favorite,
     Ingredient,
     Recipe,
     RecipeIngredient,
@@ -273,7 +273,7 @@ class RecipeTestSerializer(serializers.ModelSerializer):
         ).data
         if self.request.user.is_authenticated:
             representation[
-                'is_favorited'] = Favourite.objects.filter(
+                'is_favorited'] = Favorite.objects.filter(
                 user=self.request.user, recipe=instance).exists()
             representation[
                 'is_in_shopping_cart'] = ShoppingCart.objects.filter(

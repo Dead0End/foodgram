@@ -56,7 +56,7 @@ class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
 
 
-class UserViewSet(UserViewSet):
+class CustomUserViewSet(UserViewSet):
     serializer_class = UserSerializer
     ordering = ('name')
     queryset = User.objects.all()
