@@ -5,13 +5,13 @@ from django.contrib.auth import get_user_model
 
 from users.models import CustomUser
 from recipes.models import (Recipe,
-                            Ingredient,
-                            Tag,
-                            Favorite,
-                            ShoppingList,
-                            RecipeIngredient,
-                            ShoppingCart,
-                            Subscription)
+                          Ingredient,
+                          Tag,
+                          Favorite,
+                          ShoppingList,
+                          RecipeIngredient,
+                          ShoppingCart,
+                          Subscription)
 
 User = get_user_model()
 
@@ -48,14 +48,6 @@ class CustomUserAdmin(UserAdmin):
              'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
-
-
-@admin.register(CustomUser)
-class FollowerAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'follow')
-    list_display_links = ('id', 'user')
-    search_fields = ('user__username', 'follow__username')
-    list_per_page = 25
 
 
 @admin.register(Subscription)
