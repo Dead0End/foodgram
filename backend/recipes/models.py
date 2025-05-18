@@ -187,20 +187,20 @@ class Favorite(models.Model):
         return f'{self.user.username} - {self.recipe.name}'
 
 
-class ShoppingList(models.Model): 
-    user = models.ForeignKey( 
-        User, 
-        on_delete=models.CASCADE, 
-        verbose_name=('пользователь, добавивший рецепт в корзину') 
-    ) 
-    recipe = models.ForeignKey( 
-        Recipe, 
-        on_delete=models.CASCADE, 
-        verbose_name=('Рецепт, добавленный в корзину') 
-    ) 
- 
-    class Meta: 
-        verbose_name = ('Корзина') 
+class ShoppingList(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name=('пользователь, добавивший рецепт в корзину')
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name=('Рецепт, добавленный в корзину')
+    )
+
+    class Meta:
+        verbose_name = ('Корзина')
 
 
 class ShoppingCart(models.Model):
