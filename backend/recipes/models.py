@@ -102,11 +102,6 @@ class Recipe(models.Model):
             MaxValueValidator(MAX_COOKING_TIME)
         ],
     )
-    #created_at = models.DateTimeField(
-    #    verbose_name='Дата создания',
-    #    auto_now_add=True,
-    #    db_index=True
-    #)
     tags = models.ManyToManyField(
         Tag,
         verbose_name='Теги',
