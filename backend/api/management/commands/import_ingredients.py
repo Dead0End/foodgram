@@ -40,7 +40,6 @@ class Command(BaseCommand):
                     f'Успешно импортировано {len(created)} ингредиентов'))
 
         except FileNotFoundError:
-            raise CommandError(f'Файл "{csv_file_path}" не найден. '
-                                'Убедитесь, что файл ingredients.csv находится в директории data/')
+            raise CommandError(f'Файл "{csv_file_path}" не найден. Убедитесь, что файл ingredients.csv находится в директории data/')
         except Exception as e:
             raise CommandError(f'Ошибка при импорте: {e}')
