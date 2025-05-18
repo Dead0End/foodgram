@@ -5,13 +5,13 @@ from django.contrib.auth import get_user_model
 
 from users.models import CustomUser
 from recipes.models import (Recipe,
-                          Ingredient,
-                          Tag,
-                          Favorite,
-                          ShoppingList,
-                          RecipeIngredient,
-                          ShoppingCart,
-                          Subscription)
+                            Ingredient,
+                            Tag,
+                            Favorite,
+                            ShoppingList,
+                            RecipeIngredient,
+                            ShoppingCart,
+                            Subscription)
 
 User = get_user_model()
 
