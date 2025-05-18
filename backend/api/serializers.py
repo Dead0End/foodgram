@@ -1,33 +1,26 @@
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
+from django.contrib.auth import get_user_model
+from django.db import transaction
+
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
-from drf_extra_fields.fields import Base64ImageField
-from django.core.validators import MinValueValidator
-
-from django.core.exceptions import ValidationError
-
-from django.db import transaction
-from django.contrib.auth import get_user_model
-from djoser.serializers import UserSerializer, UserCreateSerializer
-
-from recipes.models import (Favourite,
-                            Ingredient,
-                            Recipe,
-                            RecipeUser,
-                            Tag,
-                            Subscription,
-                            RecipeItself,
-                            RecipeIngredient,
-                            ShoppingCart)
-from users.models import (CustomUser)
+from recipes.models import (
+    Favourite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    RecipeItself,
+    RecipeUser,
+    ShoppingCart,
+    Subscription,
+    Tag
+)
+from users.models import CustomUser
 
 User = get_user_model()
-
-
-class CustomUserSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = CustomUser
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', ]
 
 
 class UserSerializer(UserSerializer):
