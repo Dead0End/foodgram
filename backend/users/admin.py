@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
 from django.contrib.auth import get_user_model
 
-
+from users.models import CustomUser
 from recipes.models import (Recipe,
                             Ingredient,
                             Tag,
@@ -16,7 +16,7 @@ from recipes.models import (Recipe,
 User = get_user_model()
 
 
-@admin.register(User)
+@admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     list_display = (
         'id',
@@ -50,7 +50,7 @@ class CustomUserAdmin(UserAdmin):
     )
 
 
-@admin.register(User)
+@admin.register(CustomUser)
 class FollowerAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'follow')
     list_display_links = ('id', 'user')
