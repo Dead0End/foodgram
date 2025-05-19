@@ -191,9 +191,9 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         source='ingredient', queryset=Ingredient.objects.all())
     amount = serializers.IntegerField(required=True)
     name = serializers.StringRelatedField(
-        read_only=True, source='ingredient.name', required=False)
+        read_only=True, source='ingredient.name')
     measurement_unit = serializers.StringRelatedField(
-        read_only=True, source='ingredient.measurement_unit', required=False)
+        read_only=True, source='ingredient.measurement_unit')
 
     class Meta:
         model = RecipeIngredient
