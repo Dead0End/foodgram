@@ -7,7 +7,6 @@ from recipes.models import (Recipe,
                             Ingredient,
                             Tag,
                             Favourite,
-                            ShoppingList,
                             RecipeIngredient,
                             ShoppingCart,
                             Subscription)
@@ -109,7 +108,7 @@ class FavouriteAdmin(admin.ModelAdmin):
     list_per_page = 25
 
 
-@admin.register(ShoppingList)
+@admin.register(ShoppingCart)
 class ShoppingListAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     list_display_links = ('id', 'user')
