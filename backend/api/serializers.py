@@ -218,26 +218,10 @@ class RecipeTestSerializer(serializers.ModelSerializer):
             tags_data = validated_data.pop('tags')
         except KeyError:
             raise serializers.ValidationError("Нету тегов или ингридиентов")
-        image = validated_data['image']
-        print(image)
-        if not image:
-            raise serializers.ValidationError('Нету изображения')
-        if not len(ingredients_data):
-            raise serializers.ValidationError('Нету ингридиентов')
-        if not tags_data:
-            raise serializers.ValidationError('Нету тегов')
-        if len(list(tags_data)) != len(set(tags_data)):
-            raise serializers.ValidationError('Теги повторяются')
         recipe = Recipe.objects.create(**validated_data,
                                        author=self.request.user)
         recipe.tags.set(tags_data)
-        ids = []
         for ingredient_data in ingredients_data:
-            if ingredient_data['amount'] < 1:
-                raise serializers.ValidationError('Нету ингридиента')
-            if ingredient_data['ingredient'].pk in ids:
-                raise serializers.ValidationError('Ингридиенты повторяются')
-            ids.append(ingredient_data['ingredient'].pk)
             RecipeIngredient.objects.create(
                 recipe=recipe,
                 ingredient=ingredient_data['ingredient'],
