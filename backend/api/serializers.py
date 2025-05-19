@@ -159,35 +159,6 @@ class RecipeReadSerializer(RecipeSerializer):
     cooking_time = serializers.IntegerField(
         validators=(MinValueValidator(1),))
 
-    def validate_image(self, image):
-        if not image:
-            raise serializers.ValidationError(
-                'Вставьте изображение'
-            )
-        return image
-
-    def validate_tags(self, tags):
-        if not tags:
-            raise serializers.ValidationError(
-                'поставьте минимум один тег'
-            )
-        if len(tags) != len(set(tags)):
-            raise serializers.ValidationError(
-                'Не может быть двух одинаковых тегов')
-        return tags
-
-    def validate_ingredients(self, ingredients):
-        if not ingredients:
-            raise serializers.ValidationError(
-                'поставьте минимум один ингридиент'
-            )
-        ingredient_ids = [ingredient['id'] for ingredient in ingredients]
-        if len(ingredient_ids) != len(set(ingredient_ids)):
-            raise serializers.ValidationError(
-                'Не может быть двух одинаковых ингриддиентов'
-            )
-        return ingredients
-
     def to_representation(self, instance):
         representation = super().to_representation(instance).data
         return representation
