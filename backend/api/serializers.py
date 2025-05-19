@@ -168,13 +168,6 @@ class RecipeReadSerializer(RecipeSerializer):
         read_only_fields = ('author',)
 
 
-class FollowerSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Favourite
-        fields = '__all__'
-
-
 class AvatarSerializer(serializers.ModelSerializer):
     avatar = Base64ImageField(allow_null=True)
 
@@ -194,75 +187,6 @@ class CreateSubscribeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
         fields = '__all__'
-
-
-class RecipeCreateSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
-    image = Base64ImageField(required=True)
-    ingredients = IngridientSerializer(many=True)
-    tags = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(), many=True
-    )
-    cooking_time = serializers.IntegerField(
-        validators=(MinValueValidator(1),))
-
-    class Meta(BasicRecipeSerializer.Meta):
-        fields = BasicRecipeSerializer.Meta.fields
-
-    def validate_image(self, image):
-        if not image:
-            raise serializers.ValidationError(
-                'Вставьте изображение'
-            )
-        return image
-
-    def validate_tags(self, tags):
-        if not tags:
-            raise serializers.ValidationError(
-                'поставьте минимум один тег'
-            )
-        if len(tags) != len(set(tags)):
-            raise serializers.ValidationError(
-                'Не может быть двух одинаковых тегов')
-        return tags
-
-    def validate_ingredients(self, ingredients):
-        if not ingredients:
-            raise serializers.ValidationError(
-                'поставьте минимум один ингридиент'
-            )
-        ingredient_ids = [ingredient['id'] for ingredient in ingredients]
-        if len(ingredient_ids) != len(set(ingredient_ids)):
-            raise serializers.ValidationError(
-                'Не может быть двух одинаковых ингриддиентов'
-            )
-        return ingredients
-
-    def create_ingredients(self, recipe, ingredients):
-        RecipeItself.objects.bulk_create(
-            RecipeItself(
-                recipe=recipe,
-                ingredient=ingredient['id'],
-                name=ingredient['name'],
-                measurement_unit=ingredient['measurement_unit'],
-                amount=ingredient['amount'],
-            )
-            for ingredient in ingredients
-        )
-
-    @transaction.atomic
-    def create(self, validated_data):
-        tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('ingredients')
-        recipe = RecipeUser.objects.create(['pk'])
-        recipe.tags.set(tags)
-        recipe.save()
-        self.create_ingredients(recipe, ingredients)
-        return recipe
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance).data
-        return representation
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
