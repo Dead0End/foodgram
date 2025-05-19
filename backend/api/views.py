@@ -84,14 +84,6 @@ class UserViewSet(UserViewSet):
             serializer.save()
             return Response(serializer.data)
 
-    @action(detail=False, url_path='me')
-    def anonymous_me(self, request):
-        if request.user.is_anonymous:
-            return Response({'detail': 'Unauthorized'},
-                            status=status.HTTP_401_UNAUTHORIZED)
-        serializer = self.serializer_class(request.user)
-        return Response(serializer.data)
-
     @action(detail=True, methods=['post', 'delete'], url_path='subscribe')
     def subscribe(self, request, **kwargs):
         user = request.user
@@ -141,11 +133,6 @@ class UserViewSet(UserViewSet):
             serializer_class=SubscriptionSerializer)
     def subscriptions(self, request):
         queryset = Subscription.objects.filter(user=request.user).all()
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = SubscriptionSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
