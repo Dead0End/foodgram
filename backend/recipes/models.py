@@ -80,35 +80,35 @@ class Recipe(models.Model):
 
 class RecipeUser(models.Model):
     username = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         related_name='User',
         verbose_name='пользователь',
         blank=False
     )
     email = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         related_name='Email',
         verbose_name='Email',
         blank=False
     )
     password = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         related_name='Password',
         verbose_name='Пароль',
         blank=False
     )
     first_name = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         related_name='First_name',
         verbose_name='Имя',
         blank=False
     )
     last_name = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         related_name='Last_name',
         verbose_name='Фамилия',
@@ -179,31 +179,31 @@ class RecipeItself(models.Model):
         related_name='Recipe.text+'
     )
     username = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         verbose_name='Никнейм пользователя',
         related_name='User.username+'
     )
     first_name = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         verbose_name='Имя пользователя',
         related_name='User.first_name+'
     )
     last_name = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         verbose_name='Фамилия пользователя',
         related_name='User.last_name+'
     )
     email = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         verbose_name='email пользователя',
         related_name='User.email+'
     )
     password = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         verbose_name='Пароль',
         related_name='User.password+'
