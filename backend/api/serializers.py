@@ -11,7 +11,6 @@ from recipes.models import (
     Ingredient,
     Recipe,
     RecipeIngredient,
-    RecipeUser,
     ShoppingCart,
     Subscription,
     Tag
@@ -80,7 +79,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class BasicRecipeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = RecipeUser
+        model = Recipe
         fields = (
             'id',
             'tags',
