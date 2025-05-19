@@ -11,6 +11,7 @@ from recipes.models import (
     Ingredient,
     Recipe,
     RecipeIngredient,
+    RecipeUser,
     ShoppingCart,
     Subscription,
     Tag
@@ -79,7 +80,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class BasicRecipeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Recipe
+        model = RecipeUser
         fields = (
             'id',
             'tags',
@@ -191,9 +192,9 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         source='ingredient', queryset=Ingredient.objects.all())
     amount = serializers.IntegerField(required=True)
     name = serializers.StringRelatedField(
-        read_only=True, source='ingredient.name')
+        read_only=True, source='ingredient.name', required=False)
     measurement_unit = serializers.StringRelatedField(
-        read_only=True, source='ingredient.measurement_unit')
+        read_only=True, source='ingredient.measurement_unit', required=False)
 
     class Meta:
         model = RecipeIngredient

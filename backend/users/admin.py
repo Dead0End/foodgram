@@ -7,10 +7,10 @@ from recipes.models import (Recipe,
                             Ingredient,
                             Tag,
                             Favourite,
+                            ShoppingList,
                             RecipeIngredient,
                             ShoppingCart,
-                            Subscription,
-                            ShoppingList)
+                            Subscription)
 
 
 @admin.register(CustomUser)
