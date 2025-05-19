@@ -1,7 +1,7 @@
 from rest_framework import status, mixins, viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
@@ -36,9 +36,7 @@ from api.filters import IngredientFilter
 User = get_user_model()
 
 
-class IngridientViewSet(mixins.RetrieveModelMixin,
-                        mixins.ListModelMixin,
-                        viewsets.GenericViewSet):
+class IngridientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     search_fields = ['name']
     http_method_names = ['get']
@@ -51,22 +49,11 @@ class IngridientViewSet(mixins.RetrieveModelMixin,
         return IngridientSerializer
 
 
-class TagViewSet(mixins.RetrieveModelMixin,
-                 mixins.ListModelMixin,
-                 viewsets.GenericViewSet):
+class TagViewSet(ReadOnlyModelViewSet):
     serializer_class = TagSerializer
     permission_class = (AllowAny)
     pagination_class = None
     queryset = Tag.objects.all()
-
-    @action(detail=False, url_path='me')
-    def anonymous_tags(self, request):
-        if request.user.is_anonymous:
-            return Response(
-                {'detail': 'Unauthorized'},
-                status=status.HTTP_401_UNAUTHORIZED)
-        serializer = self.serializer_class(request.user)
-        return Response(serializer.data)
 
 
 class UserViewSet(UserViewSet):
