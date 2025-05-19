@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.contrib.auth import get_user_model
-from django.db import transaction
 
 from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
@@ -12,7 +11,6 @@ from recipes.models import (
     Ingredient,
     Recipe,
     RecipeIngredient,
-    RecipeItself,
     RecipeUser,
     ShoppingCart,
     Subscription,
