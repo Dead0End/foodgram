@@ -9,7 +9,8 @@ from recipes.models import (Recipe,
                             Favourite,
                             RecipeIngredient,
                             ShoppingCart,
-                            Subscription)
+                            Subscription,
+                            ShoppingList)
 
 
 @admin.register(CustomUser)
@@ -108,7 +109,7 @@ class FavouriteAdmin(admin.ModelAdmin):
     list_per_page = 25
 
 
-@admin.register(ShoppingCart)
+@admin.register(ShoppingList)
 class ShoppingListAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     list_display_links = ('id', 'user')
