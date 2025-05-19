@@ -84,11 +84,6 @@ class UserViewSet(UserViewSet):
             serializer.save()
             return Response(serializer.data)
 
-        elif self.request.method == 'DELETE':
-            user = self.request.user
-            user.avatar.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
     @action(detail=False, url_path='me')
     def anonymous_me(self, request):
         if request.user.is_anonymous:
