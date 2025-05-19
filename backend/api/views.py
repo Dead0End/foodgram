@@ -58,7 +58,7 @@ class TagViewSet(ReadOnlyModelViewSet):
 
 class UserViewSet(UserViewSet):
     serializer_class = UserSerializer
-    ordering = ('id')
+    ordering = ('name')
     queryset = User.objects.all()
     pagination_class = Pagination
 
@@ -71,7 +71,7 @@ class UserViewSet(UserViewSet):
     @action(
         methods=['PUT', 'DELETE'],
         detail=False,
-        permission_classes=[IsAuthenticated, IsAuthorOrReadOnly],
+        permission_classes=[IsAuthenticated],
         url_path='me/avatar',
     )
     def avatar_put_delete(self, request, *args, **kwargs):
