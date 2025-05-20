@@ -31,8 +31,7 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
-                    f'Успешно импортировано {len(
-                        created_ingredients)} ингредиентов'))
+                    f'Добавлено {len(created_ingredients)} ингредиентов'))
         except FileNotFoundError:
             self.stdout.write(self.style.ERROR(
                 f'Файл "{csv_file_path}" не найден.'))
