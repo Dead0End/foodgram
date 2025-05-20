@@ -1,6 +1,6 @@
 import re
+
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import transaction
 
@@ -29,13 +29,13 @@ class UserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
-        return (request and request.user.is_authenticated 
+        return (request and request.user.is_authenticated
                 and request.user.follower.filter(follow=obj).exists())
 
     class Meta:
         model = CustomUser
         fields = [
-            'id', 'username', 'first_name', 'last_name', 
+            'id', 'username', 'first_name', 'last_name',
             'email', 'avatar', 'is_subscribed'
         ]
 
@@ -107,7 +107,6 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
 class CustomUserCreateSerializer(UserCreateSerializer):
     def validate_username(self, username):
-        import re
         if re.search('[!@#$%^&*()_]', username):
             raise serializers.ValidationError('Не проходит шаблон')
         return username
@@ -133,7 +132,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = (
-            'ingredients', 'tags', 'image', 
+            'ingredients', 'tags', 'image',
             'name', 'text', 'cooking_time'
         )
 
@@ -147,16 +146,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def validate_ingredients(self, ingredients):
         if not ingredients:
             raise serializers.ValidationError('Добавьте хотя бы один ингредиент')
-        
         ingredient_ids = [ingredient['ingredient'].id for ingredient in ingredients]
         if len(ingredient_ids) != len(set(ingredient_ids)):
             raise serializers.ValidationError('Ингредиенты не должны повторяться')
-        
         for ingredient in ingredients:
             if ingredient['amount'] < 1:
                 raise serializers.ValidationError(
                     'Количество ингредиента должно быть больше 0')
-        
         return ingredients
 
     @transaction.atomic
@@ -173,7 +169,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        
         recipe = Recipe.objects.create(
             author=self.context['request'].user,
             **validated_data
@@ -186,11 +181,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        
         instance.ingredients.clear()
         self.create_ingredients(instance, ingredients)
         instance.tags.set(tags)
-        
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
@@ -270,6 +263,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
+
 
 class RecipeTestSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=True)
