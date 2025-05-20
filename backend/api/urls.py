@@ -2,7 +2,7 @@ from rest_framework import routers
 from django.urls import path, include, re_path
 
 from api.views import (
-    IngridientViewSet,
+    IngredientViewSet,
     TagViewSet,
     UserViewSet,
     RecipeTestViewSet
@@ -14,7 +14,7 @@ router = routers.DefaultRouter()
 
 router.register('users', UserViewSet, basename='users')
 router.register('tags', TagViewSet, basename='tags')
-router.register('ingredients', IngridientViewSet, basename='ingredients')
+router.register('ingredients', IngredientViewSet, basename='ingredients')
 router.register('recipes', RecipeTestViewSet, basename='recipes')
 router.register(r'recipes', RecipeTestViewSet, basename='recipe')
 

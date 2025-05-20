@@ -1,4 +1,4 @@
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -12,11 +12,12 @@ from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
 
-from .pagination import Pagination
+from .pagination import CustomPagination
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     UserSerializer,
-    IngridientSerializer,
+    IngredientSerializer,
+    IngredientCreateSerializer,
     TagSerializer,
     AvatarSerializer,
     SubscriptionSerializer,
@@ -36,7 +37,7 @@ from api.filters import IngredientFilter
 User = get_user_model()
 
 
-class IngridientViewSet(ReadOnlyModelViewSet):
+class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     search_fields = ['name']
     http_method_names = ['get']
@@ -46,7 +47,9 @@ class IngridientViewSet(ReadOnlyModelViewSet):
     filterset_fields = ['name']
 
     def get_serializer_class(self):
-        return IngridientSerializer
+        if self.action in ['create']:
+            return IngredientCreateSerializer
+        return IngredientSerializer
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -58,9 +61,9 @@ class TagViewSet(ReadOnlyModelViewSet):
 
 class UserViewSet(UserViewSet):
     serializer_class = UserSerializer
-    ordering = ('name')
+    ordering = ('id')
     queryset = User.objects.all()
-    pagination_class = Pagination
+    pagination_class = CustomPagination
 
     @action(methods=['GET'],
             detail=False)
@@ -129,10 +132,15 @@ class UserViewSet(UserViewSet):
     @action(detail=False,
             methods=['get', 'delete'],
             url_path='subscriptions',
-            pagination_class=Pagination,
+            pagination_class=CustomPagination,
             serializer_class=SubscriptionSerializer)
     def subscriptions(self, request):
         queryset = Subscription.objects.filter(user=request.user).all()
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = SubscriptionSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -143,7 +151,7 @@ class RecipeTestViewSet(ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['author']
-    pagination_class = Pagination
+    pagination_class = CustomPagination
 
     @action(
         detail=True,

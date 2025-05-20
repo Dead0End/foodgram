@@ -1,22 +1,16 @@
 import csv
 
-from django.core.management.base import BaseCommand, CommandError
-from recipes.models import Tag
-
 from django.core.exceptions import ValidationError
+from django.core.management.base import BaseCommand
+from recipes.models import Tag
 
 
 class Command(BaseCommand):
-    help = 'Импортирует ингредиенты из CSV файла'
-
-    def add_arguments(self, parser):
-        parser.add_argument(
-            'csv_file', type=str, help='Путь к CSV файлу с ингредиентами')
+    help = 'Импортирует теги из CSV файла'
 
     def handle(self, *args, **options):
-        csv_file_path = options['csv_file']
-        imported_tags = []
-
+        csv_file_path = 'backend/data/tags.csv'
+        tags_to_create = []
         try:
             with open(csv_file_path, mode='r', encoding='utf-8') as csvfile:
                 reader = csv.reader(csvfile)
@@ -25,25 +19,23 @@ class Command(BaseCommand):
                     try:
                         tag = Tag(
                             name=row[0],
-                            slug=row[1]
+                            slug=row[1],
                         )
-                        tag.save()
-                        imported_tags.append({
-                            tag.name,
-                            tag.slug,
-                        })
-                        self.stdout.write(self.style.SUCCESS(
-                            f'Успешно импортирован тег: {tag.name}'))
-                    except ValidationError as e:
-                        self.stdout.write(self.style.ERROR(
-                            f"Ошибка валидации строки {row}: {e}"))
-                    except Exception as e:
+                        tags_to_create.append(tag)
+                    except (ValidationError, IndexError) as e:
                         self.stdout.write(self.style.ERROR(
                             f"Ошибка обработки строки {row}: {e}"))
+                        continue
+            created_tags = Tag.objects.bulk_create(
+                tags_to_create,
+                ignore_conflicts=True
+            )
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f'Успешно импортировано {len(created_tags)} тегов'))
         except FileNotFoundError:
-            raise CommandError(f'Файл "{csv_file_path}" не найден.')
+            self.stdout.write(self.style.ERROR(
+                f'Файл "{csv_file_path}" не найден.'))
         except Exception as e:
-            raise CommandError(f'Ошибка при открытии файла: {e}')
-
-        self.stdout.write(
-            self.style.SUCCESS(f'Импортированные теги: {imported_tags}'))
+            self.stdout.write(self.style.ERROR(
+                f'Ошибка при обработке файла: {e}'))
