@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from users.models import CustomUser
 from .constants import (
     MAX_TAG_NAME_LENGTH, MAX_TAG_SLUG_LENGTH,
     MAX_INGREDIENT_NAME_LENGTH, MAX_MEASUREMENT_UNIT_LENGTH,
