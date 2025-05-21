@@ -3,9 +3,9 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
 from .constants import (
-    USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH, NAME_MAX_LENGTH, PASSWORD_MAX_LENGTH,
+    USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH, NAME_MAX_LENGTH,
     USERNAME_VERBOSE, USERNAME_HELP, EMAIL_VERBOSE, EMAIL_HELP,
-    FIRST_NAME_VERBOSE, FIRST_NAME_HELP, LAST_NAME_VERBOSE, PASSWORD_VERBOSE,
+    FIRST_NAME_VERBOSE, FIRST_NAME_HELP, LAST_NAME_VERBOSE,
     AVATAR_VERBOSE, AVATAR_HELP, AVATAR_UPLOAD_TO,
     USER_VERBOSE, USER_VERBOSE_PLURAL,
     FOLLOWER_UNIQUE_CONSTRAINT_NAME, FOLLOWER_CHECK_CONSTRAINT_NAME
@@ -65,18 +65,21 @@ class Follower(models.Model):
         CustomUser,
         on_delete=models.CASCADE,
         related_name='follow',
-        verbose_name='Подписка')
+        verbose_name='Подписка'
+    )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
                 fields=('user', 'follow'),
-                name=FOLLOWER_UNIQUE_CONSTRAINT_NAME),
+                name=FOLLOWER_UNIQUE_CONSTRAINT_NAME
+            ),
             models.CheckConstraint(
                 name=FOLLOWER_CHECK_CONSTRAINT_NAME,
                 check=~models.Q(user=models.F('follow')),
-            )
-        ]
+        )]
+        verbose_name = 'Подписчик'
+        verbose_name_plural = 'Подписчики'
 
     def __str__(self):
         return f'{self.user.username} подписан на {self.follow.username}'

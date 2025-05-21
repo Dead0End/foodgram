@@ -2,14 +2,16 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as User_Admin
 from django.db.models import Count
 
+from recipes.models import (
+    Favourite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Subscription,
+    Tag,
+)
 from users.models import CustomUser, Follower
-from recipes.models import (Recipe,
-                            Ingredient,
-                            Tag,
-                            Favourite,
-                            RecipeIngredient,
-                            ShoppingCart,
-                            Subscription)
 
 
 @admin.register(CustomUser)

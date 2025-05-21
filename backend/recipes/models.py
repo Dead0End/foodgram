@@ -1,7 +1,8 @@
-from django.core.validators import MinValueValidator
-from django.core.exceptions import ValidationError
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
+from django.db import models
+
 from users.models import CustomUser
 from .constants import (
     MAX_TAG_NAME_LENGTH, MAX_TAG_SLUG_LENGTH,
@@ -30,6 +31,10 @@ class Tag(models.Model):
     class Meta:
         ordering = ('name',)
         verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
+
+    def __str__(self):
+        return self.name
 
 
 class Ingredient(models.Model):
@@ -47,7 +52,11 @@ class Ingredient(models.Model):
 
     class Meta:
         ordering = ('name',)
-        verbose_name = 'ингридиенты'
+        verbose_name = 'ингридиент'
+        verbose_name_plural = 'ингридиенты'
+
+    def __str__(self):
+        return f'{self.name}, {self.measurement_unit}'
 
 
 class Recipe(models.Model):
@@ -77,146 +86,50 @@ class Recipe(models.Model):
         Tag,
         verbose_name='Тег'
     )
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        through='RecipeIngredient',
+        verbose_name='Ингредиенты'
+    )
 
     class Meta:
         ordering = ('name',)
         verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+
+    def __str__(self):
+        return self.name
 
 
-class RecipeUser(models.Model):
-    username = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='User',
-        verbose_name='пользователь',
-        blank=False
-    )
-    email = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='Email',
-        verbose_name='Email',
-        blank=False
-    )
-    password = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='Password',
-        verbose_name='Пароль',
-        blank=False
-    )
-    first_name = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='First_name',
-        verbose_name='Имя',
-        blank=False
-    )
-    last_name = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='Last_name',
-        verbose_name='Фамилия',
-        blank=False
-    )
-    name = models.ForeignKey(
+class RecipeIngredient(models.Model):
+    recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='Recipe',
-        verbose_name='Рецепт',
-        blank=False
+        related_name='ingredients_amounts',
+        verbose_name='Рецепт'
     )
-    text = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='Text',
-        verbose_name='Текст',
-        blank=False
-
-    )
-    image = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='Image',
-        verbose_name='Фото',
-        blank=False
-    )
-    cooking_time = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='Cooking_time',
-        verbose_name='Время приготовления',
-        blank=False
-    )
-    tag = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='Tag',
-        verbose_name='Тег',
-        blank=False
-    )
-
-
-class RecipeItself(models.Model):
-    """Класс для объединения рецепта и ингридиентов."""
-    name = models.ForeignKey(
+    ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        verbose_name='имя ингридиента',
-        related_name='Ingredient.name'
+        related_name='recipes_used',
+        verbose_name='Ингредиент'
     )
-    measurement_unit = models.ForeignKey(
-        Ingredient,
-        on_delete=models.CASCADE,
-        verbose_name='Единицы измерения',
-        related_name='Ingredient.mu+'
-    )
-    name = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Имя рецепта',
-        related_name='Recipe.name+'
-    )
-    text = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Текст рецепта',
-        related_name='Recipe.text+'
-    )
-    username = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name='Никнейм пользователя',
-        related_name='User.username+'
-    )
-    first_name = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name='Имя пользователя',
-        related_name='User.first_name+'
-    )
-    last_name = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name='Фамилия пользователя',
-        related_name='User.last_name+'
-    )
-    email = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name='email пользователя',
-        related_name='User.email+'
-    )
-    password = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name='Пароль',
-        related_name='User.password+'
+    amount = models.IntegerField(
+        verbose_name='Количество'
     )
 
     class Meta:
-        ordering = ('id',)
-        verbose_name = 'Рецепт'
+        verbose_name = 'Ингредиент в рецепте'
+        verbose_name_plural = 'Ингредиенты в рецептах'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='unique_recipe_ingredient'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.ingredient} в {self.recipe}'
 
 
 class Favourite(models.Model):
@@ -224,16 +137,26 @@ class Favourite(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name=('пользователь, добавивший рецепт в избранное')
+        verbose_name='пользователь, добавивший рецепт в избранное'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        verbose_name=('Рецепт, добавленный в избранное')
+        verbose_name='Рецепт, добавленный в избранное'
     )
 
     class Meta:
-        verbose_name = ('Понравившееся')
+        verbose_name = 'Понравившееся'
+        verbose_name_plural = 'Понравившееся'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favourite'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.user} likes {self.recipe}'
 
 
 class Subscription(models.Model):
@@ -261,44 +184,29 @@ class Subscription(models.Model):
         return f"{self.user.username} подписан на {self.author.username}"
 
 
-class RecipeIngredient(models.Model): 
-    recipe = models.ForeignKey( 
-        Recipe, 
-        on_delete=models.CASCADE, 
-        related_name='ingredients', 
-        verbose_name='Рецепт' 
-    ) 
-    ingredient = models.ForeignKey( 
-        Ingredient, 
-        on_delete=models.CASCADE, 
-        related_name='recipes', 
-        verbose_name='Ингредиент' 
-    ) 
-    amount = models.IntegerField( 
-        verbose_name='Количество' 
-    )
-
-
 class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='shopping',
+        related_name='shopping_cart',
         verbose_name='Пользователь',
     )
-    recipes = models.ForeignKey(
+    recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='in_shopping_cart',
-        verbose_name='название рецепта',
+        verbose_name='Рецепт',
     )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipes'],
+                fields=['user', 'recipe'],
                 name='unique_shopping_cart'
             )
         ]
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
+
+    def __str__(self):
+        return f'{self.recipe} в списке покупок у {self.user}'
