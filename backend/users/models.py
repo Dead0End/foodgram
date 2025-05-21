@@ -76,8 +76,7 @@ class Follower(models.Model):
             ),
             models.CheckConstraint(
                 name=FOLLOWER_CHECK_CONSTRAINT_NAME,
-                check=~models.Q(user=models.F('follow')),
-        )]
+                check=~models.Q(user=models.F('follow')),)]
         verbose_name = 'Подписчик'
         verbose_name_plural = 'Подписчики'
 
