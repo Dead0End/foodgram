@@ -1,56 +1,53 @@
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.validators import (UnicodeUsernameValidator)
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
+
+from .constants import (
+    USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH, NAME_MAX_LENGTH, PASSWORD_MAX_LENGTH,
+    USERNAME_VERBOSE, USERNAME_HELP, EMAIL_VERBOSE, EMAIL_HELP,
+    FIRST_NAME_VERBOSE, FIRST_NAME_HELP, LAST_NAME_VERBOSE, PASSWORD_VERBOSE,
+    AVATAR_VERBOSE, AVATAR_HELP, AVATAR_UPLOAD_TO,
+    USER_VERBOSE, USER_VERBOSE_PLURAL,
+    FOLLOWER_UNIQUE_CONSTRAINT_NAME, FOLLOWER_CHECK_CONSTRAINT_NAME
+)
 
 
 class CustomUser(AbstractUser):
     """Обычный пользователь."""
     username = models.CharField(
-        max_length=150,
-        verbose_name='имя пользователя',
-        help_text='Обязательное поле',
+        max_length=USERNAME_MAX_LENGTH,
+        verbose_name=USERNAME_VERBOSE,
+        help_text=USERNAME_HELP,
         unique=True,
         validators=[UnicodeUsernameValidator]
     )
     email = models.CharField(
-        max_length=150,
-        verbose_name='электронная почта',
-        help_text='обязательное поле',
+        max_length=EMAIL_MAX_LENGTH,
+        verbose_name=EMAIL_VERBOSE,
+        help_text=EMAIL_HELP,
         unique=True,
-        blank=False,
-        null=False,
     )
     first_name = models.CharField(
-        max_length=150,
-        verbose_name='настоящее имя пользователя',
-        help_text='обязательное поле',
-        blank=False,
-        null=False
+        max_length=NAME_MAX_LENGTH,
+        verbose_name=FIRST_NAME_VERBOSE,
+        help_text=FIRST_NAME_HELP,
     )
     last_name = models.CharField(
-        max_length=150,
-        verbose_name='Фамилия пользователя',
-        blank=False,
-        null=False
-    )
-    password = models.CharField(
-        max_length=150,
-        verbose_name='Пароль',
-        blank=False,
-        null=False
+        max_length=NAME_MAX_LENGTH,
+        verbose_name=LAST_NAME_VERBOSE,
     )
     avatar = models.ImageField(
-        verbose_name='Аватар пользователя',
-        help_text='вы можете загрузить отображаемое фото',
-        upload_to='users/avatars',
+        verbose_name=AVATAR_VERBOSE,
+        help_text=AVATAR_HELP,
+        upload_to=AVATAR_UPLOAD_TO,
         null=True
     )
 
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'email', 'password']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'email']
 
     class Meta:
-        verbose_name = 'пользователь'
-        verbose_name_plural = 'пользователи'
+        verbose_name = USER_VERBOSE
+        verbose_name_plural = USER_VERBOSE_PLURAL
 
     def __str__(self):
         return self.username
@@ -67,21 +64,19 @@ class Follower(models.Model):
     follow = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='follow')
+        related_name='follow',
+        verbose_name='Подписка')
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=(
-                    'user',
-                    'follow'),
-                name='me0'),
+                fields=('user', 'follow'),
+                name=FOLLOWER_UNIQUE_CONSTRAINT_NAME),
             models.CheckConstraint(
-                name='me1',
+                name=FOLLOWER_CHECK_CONSTRAINT_NAME,
                 check=~models.Q(user=models.F('follow')),
-            )]
+            )
+        ]
 
     def __str__(self):
-        return (
-            f'{self.user.username} подписан на {self.follow.username}'
-        )
+        return f'{self.user.username} подписан на {self.follow.username}'

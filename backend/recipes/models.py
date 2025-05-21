@@ -3,6 +3,12 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth import get_user_model
 from users.models import CustomUser
+from .constants import (
+    MAX_TAG_NAME_LENGTH, MAX_TAG_SLUG_LENGTH,
+    MAX_INGREDIENT_NAME_LENGTH, MAX_MEASUREMENT_UNIT_LENGTH,
+    MAX_RECIPE_NAME_LENGTH, MAX_RECIPE_TEXT_LENGTH,
+    MIN_COOKING_TIME, RECIPE_IMAGE_UPLOAD_PATH
+)
 
 User = get_user_model()
 
@@ -10,32 +16,32 @@ User = get_user_model()
 class Tag(models.Model):
     """Класс тега."""
     name = models.CharField(
-        max_length=150,
+        max_length=MAX_TAG_NAME_LENGTH,
         verbose_name='Тег',
         unique=True,
         blank=False
     )
     slug = models.SlugField(
-        max_length=150,
+        max_length=MAX_TAG_SLUG_LENGTH,
         verbose_name='Тег',
         unique=True,
     )
 
     class Meta:
         ordering = ('name',)
-        verbose_name = ('Тег')
+        verbose_name = 'Тег'
 
 
 class Ingredient(models.Model):
     """Класс ингридиента."""
     name = models.CharField(
-        max_length=150,
+        max_length=MAX_INGREDIENT_NAME_LENGTH,
         verbose_name='Ингридиенты',
         blank=False
     )
     measurement_unit = models.CharField(
-        max_length=150,
-        verbose_name=('Единицы измерения'),
+        max_length=MAX_MEASUREMENT_UNIT_LENGTH,
+        verbose_name='Единицы измерения',
         blank=False
     )
 
@@ -52,30 +58,29 @@ class Recipe(models.Model):
         verbose_name='автор'
     )
     name = models.CharField(
-        max_length=150,
-        verbose_name=('Название'),
+        max_length=MAX_RECIPE_NAME_LENGTH,
+        verbose_name='Название',
     )
     text = models.CharField(
-        max_length=800,
-        verbose_name=('Рецепт')
+        max_length=MAX_RECIPE_TEXT_LENGTH,
+        verbose_name='Рецепт'
     )
     image = models.ImageField(
-        verbose_name=('Фото'),
-        upload_to=('recipes/images')
+        verbose_name='Фото',
+        upload_to=RECIPE_IMAGE_UPLOAD_PATH
     )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='время на приготовление',
-        validators=[
-            MinValueValidator(1)]
+        validators=[MinValueValidator(MIN_COOKING_TIME)]
     )
     tags = models.ManyToManyField(
         Tag,
-        verbose_name=('Тег')
+        verbose_name='Тег'
     )
 
     class Meta:
         ordering = ('name',)
-        verbose_name = ('Рецепт')
+        verbose_name = 'Рецепт'
 
 
 class RecipeUser(models.Model):
@@ -231,22 +236,6 @@ class Favourite(models.Model):
         verbose_name = ('Понравившееся')
 
 
-class ShoppingList(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name=('пользователь, добавивший рецепт в корзину')
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name=('Рецепт, добавленный в корзину')
-    )
-
-    class Meta:
-        verbose_name = ('Корзина')
-
-
 class Subscription(models.Model):
     user = models.ForeignKey(
         User,
@@ -272,21 +261,21 @@ class Subscription(models.Model):
         return f"{self.user.username} подписан на {self.author.username}"
 
 
-class RecipeIngredient(models.Model):
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='ingredients',
-        verbose_name='Рецепт'
-    )
-    ingredient = models.ForeignKey(
-        Ingredient,
-        on_delete=models.CASCADE,
-        related_name='recipes',
-        verbose_name='Ингредиент'
-    )
-    amount = models.IntegerField(
-        verbose_name='Количество'
+class RecipeIngredient(models.Model): 
+    recipe = models.ForeignKey( 
+        Recipe, 
+        on_delete=models.CASCADE, 
+        related_name='ingredients', 
+        verbose_name='Рецепт' 
+    ) 
+    ingredient = models.ForeignKey( 
+        Ingredient, 
+        on_delete=models.CASCADE, 
+        related_name='recipes', 
+        verbose_name='Ингредиент' 
+    ) 
+    amount = models.IntegerField( 
+        verbose_name='Количество' 
     )
 
 
