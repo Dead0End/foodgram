@@ -1,21 +1,20 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as User_Admin
+from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
 
-from recipes.models import (
-    Favourite,
-    Ingredient,
-    Recipe,
-    RecipeIngredient,
-    ShoppingCart,
-    Subscription,
-    Tag,
-)
 from users.models import CustomUser, Follower
+from recipes.models import (Recipe,
+                            Ingredient,
+                            Tag,
+                            Favourite,
+                            ShoppingList,
+                            RecipeIngredient,
+                            ShoppingCart,
+                            Subscription)
 
 
 @admin.register(CustomUser)
-class UserAdmin(User_Admin):
+class CustomUserAdmin(UserAdmin):
     list_display = (
         'id',
         'username',
@@ -104,6 +103,14 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Favourite)
 class FavouriteAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'recipe')
+    list_display_links = ('id', 'user')
+    search_fields = ('user__username', 'recipe__name')
+    list_per_page = 25
+
+
+@admin.register(ShoppingList)
+class ShoppingListAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     list_display_links = ('id', 'user')
     search_fields = ('user__username', 'recipe__name')
