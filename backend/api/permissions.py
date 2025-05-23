@@ -17,16 +17,3 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
             request.method in permissions.SAFE_METHODS
             or obj.author == request.user
         )
-
-
-class IsUnauthorizedUser(permissions.BasePermission):
-    """
-    Разрешает доступ только неавторизованным пользователям.
-    """
-    def has_permission(self, request, view):
-        return not request.user.is_authenticated
-
-    def handle_no_permission(self):
-        return Response(
-            {"detail": "Доступ запрещен для авторизованных пользователей."},
-            status=status.HTTP_403_FORBIDDEN)
