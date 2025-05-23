@@ -41,7 +41,7 @@ class CustomUser(AbstractUser):
         help_text=AVATAR_HELP,
         upload_to=AVATAR_UPLOAD_TO,
         null=True,
-        blank=True 
+        blank=True
     )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'username']
