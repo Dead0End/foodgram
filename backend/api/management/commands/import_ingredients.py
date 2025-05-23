@@ -1,7 +1,7 @@
 import csv
-
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from recipes.models import Ingredient
 
 
@@ -9,8 +9,9 @@ class Command(BaseCommand):
     help = 'Импортирует ингредиенты из CSV файла'
 
     def handle(self, *args, **options):
-        csv_file_path = 'backend/data/ingredients.csv'
+        csv_file_path = settings.BASE_DIR / 'data' / 'ingredients.csv'
         ingredients_to_create = []
+        
         try:
             with open(csv_file_path, mode='r', encoding='utf-8') as csvfile:
                 reader = csv.reader(csvfile)
@@ -25,6 +26,7 @@ class Command(BaseCommand):
                         self.stdout.write(self.style.ERROR(
                             f"Ошибка обработки строки {row}: {e}"))
                         continue
+            
             created_ingredients = Ingredient.objects.bulk_create(
                 ingredients_to_create,
                 ignore_conflicts=True
@@ -32,6 +34,7 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.SUCCESS(
                     f'Добавлено {len(created_ingredients)} ингредиентов'))
+                    
         except FileNotFoundError:
             self.stdout.write(self.style.ERROR(
                 f'Файл "{csv_file_path}" не найден.'))
