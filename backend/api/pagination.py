@@ -3,7 +3,7 @@ from rest_framework.pagination import PageNumberPagination
 from .constants import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 
 
-class CustomPagination(PageNumberPagination):
+class Pagination(PageNumberPagination):
     """
     Универсальный пагинатор для всех эндпоинтов API.
     Позволяет клиенту запрашивать размер страницы через параметр limit,

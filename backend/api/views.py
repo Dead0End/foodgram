@@ -12,7 +12,7 @@ from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
 
-from .pagination import CustomPagination
+from .pagination import Pagination
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     UserSerializer,
@@ -63,7 +63,7 @@ class UserViewSet(UserViewSet):
     serializer_class = UserSerializer
     ordering = ('id')
     queryset = User.objects.all()
-    pagination_class = CustomPagination
+    pagination_class = Pagination
 
     @action(methods=['GET'],
             detail=False)
@@ -132,7 +132,7 @@ class UserViewSet(UserViewSet):
     @action(detail=False,
             methods=['get', 'delete'],
             url_path='subscriptions',
-            pagination_class=CustomPagination,
+            pagination_class=Pagination,
             serializer_class=SubscriptionSerializer)
     def subscriptions(self, request):
         queryset = Subscription.objects.filter(user=request.user).all()
@@ -151,7 +151,7 @@ class RecipeTestViewSet(ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['author']
-    pagination_class = CustomPagination
+    pagination_class = Pagination
 
     @action(
         detail=True,
