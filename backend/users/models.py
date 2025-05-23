@@ -12,6 +12,20 @@ from .constants import (
 )
 
 
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.db import models
+
+from .constants import (
+    USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH, NAME_MAX_LENGTH,
+    USERNAME_VERBOSE, USERNAME_HELP, EMAIL_VERBOSE, EMAIL_HELP,
+    FIRST_NAME_VERBOSE, FIRST_NAME_HELP, LAST_NAME_VERBOSE,
+    AVATAR_VERBOSE, AVATAR_HELP, AVATAR_UPLOAD_TO,
+    USER_VERBOSE, USER_VERBOSE_PLURAL,
+    FOLLOWER_UNIQUE_CONSTRAINT_NAME, FOLLOWER_CHECK_CONSTRAINT_NAME
+)
+
+
 class CustomUser(AbstractUser):
     """Обычный пользователь."""
     username = models.CharField(
@@ -21,7 +35,7 @@ class CustomUser(AbstractUser):
         unique=True,
         validators=[UnicodeUsernameValidator]
     )
-    email = models.CharField(
+    email = models.EmailField(
         max_length=EMAIL_MAX_LENGTH,
         verbose_name=EMAIL_VERBOSE,
         help_text=EMAIL_HELP,
@@ -40,10 +54,11 @@ class CustomUser(AbstractUser):
         verbose_name=AVATAR_VERBOSE,
         help_text=AVATAR_HELP,
         upload_to=AVATAR_UPLOAD_TO,
-        null=True
+        null=True,
+        blank=True 
     )
-
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'email']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'username']
 
     class Meta:
         verbose_name = USER_VERBOSE

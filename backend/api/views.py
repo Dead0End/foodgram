@@ -17,7 +17,6 @@ from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     UserSerializer,
     IngredientSerializer,
-    IngredientCreateSerializer,
     TagSerializer,
     AvatarSerializer,
     SubscriptionSerializer,
@@ -45,11 +44,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientFilter
     filterset_fields = ['name']
-
-    def get_serializer_class(self):
-        if self.action in ['create']:
-            return IngredientCreateSerializer
-        return IngredientSerializer
+    serializer_class = IngredientSerializer
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -61,12 +56,13 @@ class TagViewSet(ReadOnlyModelViewSet):
 
 class UserViewSet(UserViewSet):
     serializer_class = UserSerializer
-    ordering = ('id')
+    ordering = ('username')
     queryset = User.objects.all()
     pagination_class = Pagination
 
     @action(methods=['GET'],
-            detail=False)
+            detail=False,
+            permission_classes=[IsAuthenticated],)
     def me(self, request, *args, **kwargs):
         self.get_object = self.get_instance
         return self.retrieve(request, *args, **kwargs)
@@ -78,14 +74,32 @@ class UserViewSet(UserViewSet):
         url_path='me/avatar',
     )
     def avatar_put_delete(self, request, *args, **kwargs):
-        if self.request.method == 'PUT':
+        user = request.user
+
+        if request.method == 'PUT':
             serializer = AvatarSerializer(
-                instance=request.user,
+                instance=user,
                 data=request.data,
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
+
+        elif request.method == 'DELETE':
+            if not user.avatar:
+                return Response(
+                    {'error': 'Аватар отсутствует'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            user.avatar.delete(save=False)
+            user.avatar = None
+            user.save()
+
+            return Response(
+                {'message': 'Аватар успешно удалён'},
+                status=status.HTTP_204_NO_CONTENT
+            )
 
     @action(detail=True, methods=['post', 'delete'], url_path='subscribe')
     def subscribe(self, request, **kwargs):
@@ -115,19 +129,16 @@ class UserViewSet(UserViewSet):
                 return Response(
                     {'errors': str(e)},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            author = get_object_or_404(User, pk=self.kwargs['id'])
-            subscription = Subscription.objects.filter(
-                user=request.user, author=author)
-
-            if not subscription.exists():
-                return Response(
-                    {'errors': 'Вы не подписаны'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        author = get_object_or_404(User, pk=self.kwargs['id'])
+        subscription = Subscription.objects.filter(
+            user=request.user, author=author)
+        if not subscription.exists():
+            return Response(
+                {'errors': 'Вы не подписаны'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        subscription.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False,
             methods=['get', 'delete'],

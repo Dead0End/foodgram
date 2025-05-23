@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
 
@@ -11,10 +12,12 @@ from recipes.models import (Recipe,
                             RecipeIngredient,
                             ShoppingCart,
                             Subscription)
+User = get_user_model()
+
 
 
 @admin.register(CustomUser)
-class CustomUserAdmin(UserAdmin):
+class UserAdmin(UserAdmin):
     list_display = (
         'id',
         'username',

@@ -18,7 +18,6 @@ from recipes.models import (
     Subscription,
     RecipeUser
 )
-from users.models import CustomUser
 
 User = get_user_model()
 
@@ -33,7 +32,7 @@ class UserSerializer(UserSerializer):
                 and request.user.follower.filter(follow=obj).exists())
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = [
             'id', 'username', 'first_name', 'last_name',
             'email', 'avatar', 'is_subscribed'
@@ -52,11 +51,6 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit')
 
 
-class IngredientCreateSerializer(IngredientSerializer):
-    class Meta(IngredientSerializer.Meta):
-        fields = ['name', 'measurement_unit']
-
-
 class AvatarSerializer(serializers.ModelSerializer):
     avatar = Base64ImageField(allow_null=True)
 
@@ -68,14 +62,13 @@ class AvatarSerializer(serializers.ModelSerializer):
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source='ingredient', queryset=Ingredient.objects.all())
-    name = serializers.StringRelatedField(source='ingredient.name')
-    measurement_unit = serializers.StringRelatedField(
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit')
 
     class Meta:
         model = RecipeIngredient
         fields = ('id', 'name', 'measurement_unit', 'amount')
-        read_only_fields = ('name', 'measurement_unit')
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
@@ -112,7 +105,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         return username
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = ['id',
                   'username',
                   'first_name',
@@ -126,8 +119,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True)
-    cooking_time = serializers.IntegerField(
-        validators=[MinValueValidator(1)])
+    cooking_time = serializers.IntegerField()
 
     class Meta:
         model = Recipe
@@ -143,22 +135,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Теги не должны повторяться')
         return tags
 
-    def validate_ingredients(self, ingredients):
-        if not ingredients:
-            raise serializers.ValidationError(
-                'Добавьте хотя бы один ингредиент')
-        ingredient_ids = [
-            ingredient['ingredient'].id for ingredient in ingredients]
-        if len(ingredient_ids) != len(set(ingredient_ids)):
-            raise serializers.ValidationError(
-                'Ингредиенты не должны повторяться')
-        for ingredient in ingredients:
-            if ingredient['amount'] < 1:
-                raise serializers.ValidationError(
-                    'Количество ингредиента должно быть больше 0')
-        return ingredients
-
-    @transaction.atomic
     def create_ingredients(self, recipe, ingredients):
         RecipeIngredient.objects.bulk_create([
             RecipeIngredient(
