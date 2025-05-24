@@ -108,22 +108,6 @@ class Favourite(models.Model):
         verbose_name = 'Понравившееся'
 
 
-class ShoppingList(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='пользователь, добавивший рецепт в корзину'
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Рецепт, добавленный в корзину'
-    )
-
-    class Meta:
-        verbose_name = 'Корзина'
-
-
 class Subscription(models.Model):
     user = models.ForeignKey(
         User,

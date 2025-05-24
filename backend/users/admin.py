@@ -8,7 +8,6 @@ from recipes.models import (Recipe,
                             Ingredient,
                             Tag,
                             Favourite,
-                            ShoppingList,
                             RecipeIngredient,
                             ShoppingCart,
                             Subscription)
@@ -104,14 +103,6 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Favourite)
 class FavouriteAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'recipe')
-    list_display_links = ('id', 'user')
-    search_fields = ('user__username', 'recipe__name')
-    list_per_page = 25
-
-
-@admin.register(ShoppingList)
-class ShoppingListAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     list_display_links = ('id', 'user')
     search_fields = ('user__username', 'recipe__name')
