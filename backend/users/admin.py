@@ -27,7 +27,7 @@ class UserAdmin(UserAdmin):
     list_display_links = ('id', 'username')
     search_fields = ('username', 'email')
     list_filter = ('is_staff', 'is_active', 'is_superuser')
-    ordering = ('id',)
+    ordering = ('username',)
     list_per_page = 25
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
