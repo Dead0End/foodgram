@@ -15,7 +15,6 @@ from recipes.models import (
     ShoppingCart,
     Tag,
     Subscription,
-    RecipeUser
 )
 
 User = get_user_model()
@@ -170,7 +169,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
 class AuthorRecipeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = RecipeUser
+        model = User, Recipe
         fields = (
             'id',
             'tags',

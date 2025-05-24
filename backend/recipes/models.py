@@ -91,131 +91,6 @@ class Recipe(models.Model):
         verbose_name = 'Рецепт'
 
 
-class RecipeUser(models.Model):
-    username = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='User',
-        verbose_name='пользователь',
-    )
-    email = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='Email',
-        verbose_name='Email',
-    )
-    password = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='Password',
-        verbose_name='Пароль',
-    )
-    first_name = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='First_name',
-        verbose_name='Имя',
-    )
-    last_name = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='Last_name',
-        verbose_name='Фамилия',
-    )
-    name = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='Recipe',
-        verbose_name='Рецепт',
-    )
-    text = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='Text',
-        verbose_name='Текст',
-    )
-    image = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='Image',
-        verbose_name='Фото',
-    )
-    cooking_time = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='Cooking_time',
-        verbose_name='Время приготовления',
-    )
-    tag = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='Tag',
-        verbose_name='Тег',
-    )
-
-
-class RecipeItself(models.Model):
-    """Класс для объединения рецепта и ингридиентов."""
-    name = models.ForeignKey(
-        Ingredient,
-        on_delete=models.CASCADE,
-        verbose_name='имя ингридиента',
-        related_name='Ingredient.name'
-    )
-    measurement_unit = models.ForeignKey(
-        Ingredient,
-        on_delete=models.CASCADE,
-        verbose_name='Единицы измерения',
-        related_name='Ingredient.mu+'
-    )
-    name = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Имя рецепта',
-        related_name='Recipe.name+'
-    )
-    text = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Текст рецепта',
-        related_name='Recipe.text+'
-    )
-    username = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='Никнейм пользователя',
-        related_name='User.username+'
-    )
-    first_name = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='Имя пользователя',
-        related_name='User.first_name+'
-    )
-    last_name = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='Фамилия пользователя',
-        related_name='User.last_name+'
-    )
-    email = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='email пользователя',
-        related_name='User.email+'
-    )
-    password = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='Пароль',
-        related_name='User.password+'
-    )
-
-    class Meta:
-        ordering = ('id',)
-        verbose_name = 'Рецепт'
-
-
 class Favourite(models.Model):
     """Класс рецепта, добавленного в избранное"""
     user = models.ForeignKey(
@@ -275,6 +150,7 @@ class Subscription(models.Model):
 
 
 class RecipeIngredient(models.Model):
+    """Связующая модель для ингредиентов в рецепте."""
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -284,12 +160,40 @@ class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='recipes',
+        related_name='recipe_ingredients',  # Улучшенный related_name
         verbose_name='Ингредиент'
     )
-    amount = models.IntegerField(
-        verbose_name='Количество'
+    amount = models.PositiveSmallIntegerField(
+        verbose_name='Количество',
+        validators=[
+            MinValueValidator(
+                1,
+                message='Количество должно быть не менее 1'
+            )
+        ]
     )
+
+    class Meta:
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецептов'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='unique_recipe_ingredient',
+                violation_error_message='Этот ингредиент уже есть в рецепте'
+            )
+        ]
+        ordering = ['ingredient__name']  # Сортировка по названию ингредиента
+
+    def __str__(self):
+        return f'{self.ingredient.name} - {self.amount} {self.ingredient.measurement_unit}'
+
+    def clean(self):
+        """Дополнительная валидация."""
+        if self.amount <= 0:
+            raise ValidationError(
+                {'amount': 'Количество должно быть положительным числом'}
+            )
 
 
 class ShoppingCart(models.Model):
