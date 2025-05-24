@@ -79,10 +79,9 @@ class RecipeAdmin(admin.ModelAdmin):
         queryset = super().get_queryset(request)
         return queryset.annotate(favorites_count=Count('favourite'))
 
+    @admin.display(description='В избранном', ordering='favorites_count')
     def favorites_count(self, obj):
         return obj.favorites_count
-    favorites_count.short_description = 'В избранном'
-    favorites_count.admin_order_field = 'favorites_count'
 
 
 @admin.register(Ingredient)
