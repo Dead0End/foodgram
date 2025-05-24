@@ -11,6 +11,8 @@ from .constants import (
     MIN_COOKING_TIME,
     SELF_SUBSCRIBE_ERROR
 )
+
+
 User = get_user_model()
 
 
