@@ -12,7 +12,7 @@ from .constants import (
 )
 
 
-class CustomUser(AbstractUser):
+class FoodgramUser(AbstractUser):
     """Обычный пользователь."""
     username = models.CharField(
         max_length=USERNAME_MAX_LENGTH,
@@ -57,13 +57,13 @@ class CustomUser(AbstractUser):
 class Follower(models.Model):
     """Пользователь - подписчик."""
     user = models.ForeignKey(
-        CustomUser,
+        FoodgramUser,
         on_delete=models.CASCADE,
         related_name='follower',
         verbose_name='подписчик',
     )
     follow = models.ForeignKey(
-        CustomUser,
+        FoodgramUser,
         on_delete=models.CASCADE,
         related_name='follow',
         verbose_name='Подписка'

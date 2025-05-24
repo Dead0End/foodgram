@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
 
-from users.models import CustomUser, Follower
+from users.models import FoodgramUser, Follower
 from recipes.models import (Recipe,
                             Ingredient,
                             Tag,
@@ -14,7 +14,7 @@ from recipes.models import (Recipe,
 User = get_user_model()
 
 
-@admin.register(CustomUser)
+@admin.register(FoodgramUser)
 class UserAdmin(UserAdmin):
     list_display = (
         'id',
