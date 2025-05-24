@@ -12,7 +12,6 @@ from .constants import (
     SELF_SUBSCRIBE_ERROR
 )
 
-
 User = get_user_model()
 
 
