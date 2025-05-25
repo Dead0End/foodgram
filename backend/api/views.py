@@ -20,7 +20,7 @@ from .serializers import (
     TagSerializer,
     AvatarSerializer,
     SubscriptionSerializer,
-    RecipeTestSerializer,
+    RecipeCreateSerializer,
     RecipeShortSerializer
 )
 from recipes.models import (
@@ -158,7 +158,7 @@ class UserViewSet(UserViewSet):
 
 class RecipeTestViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeTestSerializer
+    serializer_class = RecipeCreateSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['author']
