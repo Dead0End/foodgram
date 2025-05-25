@@ -149,7 +149,7 @@ class UserViewSet(UserViewSet):
         return Response(serializer.data)
 
 
-class RecipeTestViewSet(ModelViewSet):
+class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeCreateSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
