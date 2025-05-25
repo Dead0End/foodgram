@@ -2,7 +2,6 @@ import re
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
-
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
@@ -117,7 +116,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True)
-    cooking_time = serializers.IntegerField()
 
     class Meta:
         model = Recipe
