@@ -152,6 +152,35 @@ class RecipeTestViewSet(ModelViewSet):
     filterset_fields = ['author']
     pagination_class = Pagination
 
+    def _add_to_relation(self, user, obj, relation_model, relation_field, error_message):
+        """Общий метод для добавления в связь (корзину/избранное)."""
+        relation, created = relation_model.objects.get_or_create(
+            user=user,
+            **{relation_field: obj}
+        )
+        if not created:
+            return Response(
+                {'errors': error_message},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        serializer = RecipeShortSerializer(obj)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def _remove_from_relation(self, user, obj, relation_model, relation_field, error_message):
+        """Общий метод для удаления из связи (корзины/избранного)."""
+        try:
+            relation = relation_model.objects.get(
+                user=user,
+                **{relation_field: obj}
+            )
+            relation.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except relation_model.DoesNotExist:
+            return Response(
+                {'errors': error_message},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
     @action(
         detail=True,
         methods=['get'],
@@ -171,32 +200,23 @@ class RecipeTestViewSet(ModelViewSet):
     )
     def shopping_cart(self, request, pk=None):
         recipe = get_object_or_404(Recipe, id=pk)
-        user = request.user
-
+        
         if request.method == 'POST':
-            if ShoppingCart.objects.filter(
-                    user=user, recipes=recipe).exists():
-                return Response(
-                    {'errors': 'Рецепт уже в корзине'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            ShoppingCart.objects.create(user=user, recipes=recipe)
-            serializer = RecipeShortSerializer(recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+            return self._add_to_relation(
+                user=request.user,
+                obj=recipe,
+                relation_model=ShoppingCart,
+                relation_field='recipes',
+                error_message='Рецепт уже в корзине'
+            )
         elif request.method == 'DELETE':
-            try:
-                cart_item = ShoppingCart.objects.get(
-                    user=user,
-                    recipes=recipe
-                )
-                cart_item.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            except ShoppingCart.DoesNotExist:
-                return Response(
-                    {'errors': 'Нету корзины с рецептом'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            return self._remove_from_relation(
+                user=request.user,
+                obj=recipe,
+                relation_model=ShoppingCart,
+                relation_field='recipes',
+                error_message='Нету корзины с рецептом'
+            )
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
@@ -262,27 +282,20 @@ class RecipeTestViewSet(ModelViewSet):
             return Response(
                 {'errors': 'Нету такого рецепта'},
                 status=status.HTTP_404_NOT_FOUND)
+                
         if request.method == "POST":
-            favourite, created = Favourite.objects.get_or_create(
-                user=request.user, recipe=recipe)
-            if not created:
-                return Response(
-                    {'errors': 'Уже в избранном'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            else:
-                serializer = RecipeShortSerializer(recipe)
-                return Response(
-                    serializer.data,
-                    status=status.HTTP_201_CREATED)
+            return self._add_to_relation(
+                user=request.user,
+                obj=recipe,
+                relation_model=Favourite,
+                relation_field='recipe',
+                error_message='Уже в избранном'
+            )
         else:
-            try:
-                favourite = Favourite.objects.get(
-                    user=request.user,
-                    recipe=recipe)
-                favourite.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            except Favourite.DoesNotExist:
-                return Response(
-                    {'errors': 'Нет в избранном'},
-                    status=status.HTTP_400_BAD_REQUEST)
+            return self._remove_from_relation(
+                user=request.user,
+                obj=recipe,
+                relation_model=Favourite,
+                relation_field='recipe',
+                error_message='Нет в избранном'
+            )
