@@ -127,7 +127,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """Общая валидация для всех полей"""
-        # Валидация тегов
         tags = data.get('tags', [])
         if not tags:
             raise serializers.ValidationError(
@@ -137,8 +136,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {'tags': 'Теги не должны повторяться'}
             )
-
-        # Валидация ингредиентов
         ingredients = data.get('ingredients', [])
         if not ingredients:
             raise serializers.ValidationError(
@@ -150,7 +147,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {'ingredients': 'Ингредиенты не должны повторяться'}
             )
-
         for ingredient in ingredients:
             if ingredient['amount'] <= 0:
                 raise serializers.ValidationError(
@@ -191,7 +187,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context=self.context).data
-
+        
 
 class AuthorRecipeSerializer(serializers.ModelSerializer):
     class Meta:
