@@ -82,10 +82,7 @@ class UserViewSet(UserViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        user.avatar.delete(save=False)
-        user.avatar = None
-        user.save()
-
+        user.avatar.delete()
         return Response(
             {'message': 'Аватар успешно удалён'},
             status=status.HTTP_204_NO_CONTENT
