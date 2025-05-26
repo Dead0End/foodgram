@@ -283,7 +283,6 @@ class RecipeTestViewSet(ModelViewSet):
             return Response(
                 {'errors': 'Нету такого рецепта'},
                 status=status.HTTP_404_NOT_FOUND)
-                
         return self._add_to_relation(
             user=request.user,
             obj=recipe,
@@ -300,7 +299,6 @@ class RecipeTestViewSet(ModelViewSet):
             return Response(
                 {'errors': 'Нету такого рецепта'},
                 status=status.HTTP_404_NOT_FOUND)
-                
         return self._remove_from_relation(
             user=request.user,
             obj=recipe,

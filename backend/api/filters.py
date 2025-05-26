@@ -1,5 +1,5 @@
 from django_filters.rest_framework import FilterSet, filters
-from django_filters import FilterSet, BooleanFilter, AllValuesMultipleFilter
+from django_filters import FilterSet
 
 from recipes.models import Ingredient, Recipe, Tag
 
