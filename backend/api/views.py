@@ -83,6 +83,7 @@ class UserViewSet(UserViewSet):
             )
 
         user.avatar.delete()
+
         return Response(
             {'message': 'Аватар успешно удалён'},
             status=status.HTTP_204_NO_CONTENT
@@ -92,38 +93,40 @@ class UserViewSet(UserViewSet):
     def subscribe(self, request, **kwargs):
         user = request.user
         author = get_object_or_404(User, pk=self.kwargs['id'])
+        
         if request.method == "POST":
             if user == author:
                 return Response(
                     {'errors': 'Нельзя подписаться на себя'},
-                    status=status.HTTP_400_BAD_REQUEST)
-
-            if Subscription.objects.filter(
-                    user=user, author=author).exists():
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+    
+            subscription, created = Subscription.objects.get_or_create(
+                user=user,
+                author=author
+            )
+            
+            if not created:
                 return Response(
                     {'errors': 'Вы уже подписаны'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-
-            try:
-                subscription = Subscription.objects.create(
-                    user=user, author=author)
-                serializer = SubscriptionSerializer(subscription)
-                return Response(
-                    serializer.data, status=status.HTTP_201_CREATED)
-            except Exception as e:
-                print(f"Ошибка при создании подписки: {e}")
-                return Response(
-                    {'errors': str(e)},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        author = get_object_or_404(User, pk=self.kwargs['id'])
+                
+            serializer = SubscriptionSerializer(subscription)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        # DELETE method
         subscription = Subscription.objects.filter(
-            user=request.user, author=author)
+            user=request.user,
+            author=author
+        )
+        
         if not subscription.exists():
             return Response(
                 {'errors': 'Вы не подписаны'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+            
         subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
