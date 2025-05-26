@@ -1,11 +1,9 @@
-import re
-
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
-from rest_framework import status, serializers
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import (
     AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -95,15 +93,6 @@ class UserViewSet(UserViewSet):
                 {'message': 'Аватар успешно удалён'},
                 status=status.HTTP_204_NO_CONTENT
             )
-
-
-    def validate_username(self, value):
-        if not re.match(r'^[\w.@+-]+\Z', value):
-            raise serializers.ValidationError(
-                "Username may only contain letters, digits, and @/./+/-/_ characters."
-            )
-        return value
-
 
     @action(detail=True, methods=['post', 'delete'], url_path='subscribe')
     def subscribe(self, request, **kwargs):
