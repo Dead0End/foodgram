@@ -124,12 +124,34 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'name', 'text', 'cooking_time'
         )
 
-    def validate_tags(self, tags):
+    def validate(self, data):
+        """Общая валидация для ингредиентов и тегов"""
+        tags = data.get('tags', [])
+        ingredients = data.get('ingredients', [])
+
+        # Валидация тегов
         if not tags:
-            raise serializers.ValidationError('Добавьте хотя бы один тег')
+            raise serializers.ValidationError({'tags': 'Добавьте хотя бы один тег'})
         if len(tags) != len(set(tags)):
-            raise serializers.ValidationError('Теги не должны повторяться')
-        return tags
+            raise serializers.ValidationError({'tags': 'Теги не должны повторяться'})
+
+        # Валидация ингредиентов
+        if not ingredients:
+            raise serializers.ValidationError({'ingredients': 'Добавьте хотя бы один ингредиент'})
+        
+        # Проверка на уникальность ингредиентов
+        ingredient_ids = [ingredient['ingredient'].id for ingredient in ingredients]
+        if len(ingredient_ids) != len(set(ingredient_ids)):
+            raise serializers.ValidationError({'ingredients': 'Ингредиенты не должны повторяться'})
+
+        # Проверка на положительное количество
+        for ingredient in ingredients:
+            if ingredient['amount'] <= 0:
+                raise serializers.ValidationError({
+                    'ingredients': 'Количество ингредиента должно быть положительным'
+                })
+
+        return data
 
     def create_ingredients(self, recipe, ingredients):
         RecipeIngredient.objects.bulk_create([
