@@ -58,38 +58,38 @@ class UserViewSet(UserViewSet):
         return self.retrieve(request, *args, **kwargs)
 
     @action(
-        methods=['PUT', 'DELETE'],
+        methods=['PUT'],
         detail=False,
         permission_classes=[IsAuthenticated],
         url_path='me/avatar',
     )
-    def avatar_put_delete(self, request, *args, **kwargs):
+    def avatar_put(self, request, *args, **kwargs):
         user = request.user
+        serializer = AvatarSerializer(
+            instance=user,
+            data=request.data,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
-        if request.method == 'PUT':
-            serializer = AvatarSerializer(
-                instance=user,
-                data=request.data,
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-
-        elif request.method == 'DELETE':
-            if not user.avatar:
-                return Response(
-                    {'error': 'Аватар отсутствует'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            user.avatar.delete(save=False)
-            user.avatar = None
-            user.save()
-
+    @avatar_put.mapping.delete
+    def avatar_delete(self, request, *args, **kwargs):
+        user = request.user
+        if not user.avatar:
             return Response(
-                {'message': 'Аватар успешно удалён'},
-                status=status.HTTP_204_NO_CONTENT
+                {'error': 'Аватар отсутствует'},
+                status=status.HTTP_400_BAD_REQUEST
             )
+
+        user.avatar.delete(save=False)
+        user.avatar = None
+        user.save()
+
+        return Response(
+            {'message': 'Аватар успешно удалён'},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
     @action(detail=True, methods=['post', 'delete'], url_path='subscribe')
     def subscribe(self, request, **kwargs):
