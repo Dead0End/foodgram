@@ -116,7 +116,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True)
-    cooking_time = serializers.IntegerField(min_value=1)
+    cooking_time = serializers.IntegerField()
 
     class Meta:
         model = Recipe
@@ -125,35 +125,12 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'name', 'text', 'cooking_time'
         )
 
-    def validate(self, data):
-        """Общая валидация для всех полей"""
-        tags = data.get('tags', [])
+    def validate_tags(self, tags):
         if not tags:
-            raise serializers.ValidationError(
-                {'tags': 'Добавьте хотя бы один тег'}
-            )
+            raise serializers.ValidationError('Добавьте хотя бы один тег')
         if len(tags) != len(set(tags)):
-            raise serializers.ValidationError(
-                {'tags': 'Теги не должны повторяться'}
-            )
-        ingredients = data.get('ingredients', [])
-        if not ingredients:
-            raise serializers.ValidationError(
-                {'ingredients': 'Добавьте хотя бы один ингредиент'}
-            )
-
-        ingredient_ids = [ingredient['ingredient'].id for ingredient in ingredients]
-        if len(ingredient_ids) != len(set(ingredient_ids)):
-            raise serializers.ValidationError(
-                {'ingredients': 'Ингредиенты не должны повторяться'}
-            )
-        for ingredient in ingredients:
-            if ingredient['amount'] <= 0:
-                raise serializers.ValidationError(
-                    {'ingredients': 'Количество ингредиента должно быть больше 0'}
-                )
-
-        return data
+            raise serializers.ValidationError('Теги не должны повторяться')
+        return tags
 
     def create_ingredients(self, recipe, ingredients):
         RecipeIngredient.objects.bulk_create([
@@ -187,7 +164,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context=self.context).data
-        
+
 
 class AuthorRecipeSerializer(serializers.ModelSerializer):
     class Meta:
