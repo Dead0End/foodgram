@@ -22,6 +22,7 @@ from .serializers import (
     AvatarSerializer, IngredientSerializer, RecipeShortSerializer,
     RecipeTestSerializer, SubscriptionSerializer, TagSerializer, UserSerializer
 )
+from .filters import RecipeFilter
 
 User = get_user_model()
 
@@ -149,7 +150,7 @@ class RecipeTestViewSet(ModelViewSet):
     serializer_class = RecipeTestSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ['author']
+    filterset_class = RecipeFilter
     pagination_class = Pagination
 
     def _add_to_relation(self, user, obj, relation_model, relation_field, error_message):
