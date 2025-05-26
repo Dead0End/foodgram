@@ -1,4 +1,4 @@
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -79,10 +79,7 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='время на приготовление',
-        validators=[
-            MinValueValidator(MIN_COOKING_TIME),
-            MaxValueValidator(32767)
-        ]
+        validators=[MinValueValidator(MIN_COOKING_TIME)]
     )
     tags = models.ManyToManyField(
         Tag,
@@ -92,10 +89,69 @@ class Recipe(models.Model):
     class Meta:
         ordering = ('name',)
         verbose_name = 'Рецепт'
-        verbose_name_plural = 'Рецепты'
 
-    def __str__(self):
-        return self.name
+
+class RecipeUser(models.Model):
+    username = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='User',
+        verbose_name='пользователь',
+    )
+    email = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='Email',
+        verbose_name='Email',
+    )
+    password = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='Password',
+        verbose_name='Пароль',
+    )
+    first_name = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='First_name',
+        verbose_name='Имя',
+    )
+    last_name = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='Last_name',
+        verbose_name='Фамилия',
+    )
+    name = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='Recipe',
+        verbose_name='Рецепт',
+    )
+    text = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='Text',
+        verbose_name='Текст',
+    )
+    image = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='Image',
+        verbose_name='Фото',
+    )
+    cooking_time = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='Cooking_time',
+        verbose_name='Время приготовления',
+    )
+    tag = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='Tag',
+        verbose_name='Тег',
+    )
 
 
 class RecipeItself(models.Model):

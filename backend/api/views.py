@@ -1,29 +1,35 @@
-from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-
 from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework.permissions import (
-    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
-)
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django_filters.rest_framework import DjangoFilterBackend
+from django.http import HttpResponse
 
-from api.filters import IngredientFilter
-from recipes.models import (
-    Favourite, Ingredient, Recipe, ShoppingCart, Subscription, Tag
-)
 from .pagination import Pagination
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
-    AvatarSerializer, IngredientSerializer, RecipeCreateSerializer,
-    RecipeShortSerializer, SubscriptionSerializer, TagSerializer,
-    UserSerializer
+    UserSerializer,
+    IngredientSerializer,
+    TagSerializer,
+    AvatarSerializer,
+    SubscriptionSerializer,
+    RecipeTestSerializer,
+    RecipeShortSerializer
+)
+from recipes.models import (
+    Ingredient,
+    Recipe,
+    Tag,
+    Subscription,
+    ShoppingCart,
+    Favourite
 )
 from api.filters import IngredientFilter
 
@@ -79,15 +85,16 @@ class UserViewSet(UserViewSet):
             serializer.save()
             return Response(serializer.data)
 
-        if request.method == 'DELETE':
+        elif request.method == 'DELETE':
             if not user.avatar:
                 return Response(
                     {'error': 'Аватар отсутствует'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            user.avatar.delete()
-
+            user.avatar.delete(save=False)
+            user.avatar = None
+            user.save()
 
             return Response(
                 {'message': 'Аватар успешно удалён'},
@@ -149,9 +156,9 @@ class UserViewSet(UserViewSet):
         return Response(serializer.data)
 
 
-class RecipeViewSet(ModelViewSet):
+class RecipeTestViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeCreateSerializer
+    serializer_class = RecipeTestSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['author']
