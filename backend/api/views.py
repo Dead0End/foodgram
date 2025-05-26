@@ -152,7 +152,13 @@ class RecipeTestViewSet(ModelViewSet):
     filterset_fields = ['author']
     pagination_class = Pagination
 
-    def _add_to_relation(self, user, obj, relation_model, relation_field, error_message):
+    def _add_to_relation(
+            self,
+            user,
+            obj,
+            relation_model,
+            relation_field,
+            error_message):
         """Общий метод для добавления в связь (корзину/избранное)."""
         relation, created = relation_model.objects.get_or_create(
             user=user,
@@ -166,7 +172,13 @@ class RecipeTestViewSet(ModelViewSet):
         serializer = RecipeShortSerializer(obj)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def _remove_from_relation(self, user, obj, relation_model, relation_field, error_message):
+    def _remove_from_relation(
+        self,
+        user,
+        obj,
+        relation_model,
+        relation_field,
+        error_message):
         """Общий метод для удаления из связи (корзины/избранного)."""
         try:
             relation = relation_model.objects.get(
