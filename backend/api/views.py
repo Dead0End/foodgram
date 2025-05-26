@@ -194,29 +194,30 @@ class RecipeTestViewSet(ModelViewSet):
 
     @action(
         detail=True,
-        methods=['post', 'delete'],
+        methods=['post'],
         permission_classes=[IsAuthorOrReadOnly],
         url_path='shopping_cart'
     )
     def shopping_cart(self, request, pk=None):
         recipe = get_object_or_404(Recipe, id=pk)
-        
-        if request.method == 'POST':
-            return self._add_to_relation(
-                user=request.user,
-                obj=recipe,
-                relation_model=ShoppingCart,
-                relation_field='recipes',
-                error_message='Рецепт уже в корзине'
-            )
-        elif request.method == 'DELETE':
-            return self._remove_from_relation(
-                user=request.user,
-                obj=recipe,
-                relation_model=ShoppingCart,
-                relation_field='recipes',
-                error_message='Нету корзины с рецептом'
-            )
+        return self._add_to_relation(
+            user=request.user,
+            obj=recipe,
+            relation_model=ShoppingCart,
+            relation_field='recipes',
+            error_message='Рецепт уже в корзине'
+        )
+
+    @shopping_cart.mapping.delete
+    def delete_shopping_cart(self, request, pk=None):
+        recipe = get_object_or_404(Recipe, id=pk)
+        return self._remove_from_relation(
+            user=request.user,
+            obj=recipe,
+            relation_model=ShoppingCart,
+            relation_field='recipes',
+            error_message='Нету корзины с рецептом'
+        )
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
@@ -272,7 +273,7 @@ class RecipeTestViewSet(ModelViewSet):
         return response
 
     @action(detail=True,
-            methods=["post", "delete"],
+            methods=["post"],
             url_path="favorite",
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
@@ -283,19 +284,27 @@ class RecipeTestViewSet(ModelViewSet):
                 {'errors': 'Нету такого рецепта'},
                 status=status.HTTP_404_NOT_FOUND)
                 
-        if request.method == "POST":
-            return self._add_to_relation(
-                user=request.user,
-                obj=recipe,
-                relation_model=Favourite,
-                relation_field='recipe',
-                error_message='Уже в избранном'
-            )
-        else:
-            return self._remove_from_relation(
-                user=request.user,
-                obj=recipe,
-                relation_model=Favourite,
-                relation_field='recipe',
-                error_message='Нет в избранном'
-            )
+        return self._add_to_relation(
+            user=request.user,
+            obj=recipe,
+            relation_model=Favourite,
+            relation_field='recipe',
+            error_message='Уже в избранном'
+        )
+
+    @favorite.mapping.delete
+    def delete_favorite(self, request, pk=None):
+        try:
+            recipe = Recipe.objects.get(pk=pk)
+        except Recipe.DoesNotExist:
+            return Response(
+                {'errors': 'Нету такого рецепта'},
+                status=status.HTTP_404_NOT_FOUND)
+                
+        return self._remove_from_relation(
+            user=request.user,
+            obj=recipe,
+            relation_model=Favourite,
+            relation_field='recipe',
+            error_message='Нет в избранном'
+        )
