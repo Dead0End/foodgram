@@ -95,7 +95,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         )
 
 
-class CustomUserCreateSerializer(UserCreateSerializer):
+class UserCreateForDjoserSerializer(UserCreateSerializer):
     def validate_username(self, username):
         if re.search('[!@#$%^&*()_]', username):
             raise serializers.ValidationError('Не проходит шаблон')

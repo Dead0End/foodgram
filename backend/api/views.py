@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from djoser.views import UserViewSet
+from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import (
@@ -44,7 +44,7 @@ class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
 
 
-class UserViewSet(UserViewSet):
+class UserViewSet(DjoserUserViewSet):
     serializer_class = UserSerializer
     ordering = ('username')
     queryset = User.objects.all()
@@ -93,40 +93,38 @@ class UserViewSet(UserViewSet):
     def subscribe(self, request, **kwargs):
         user = request.user
         author = get_object_or_404(User, pk=self.kwargs['id'])
-        
+
         if request.method == "POST":
             if user == author:
                 return Response(
                     {'errors': 'Нельзя подписаться на себя'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-    
+
             subscription, created = Subscription.objects.get_or_create(
                 user=user,
                 author=author
             )
-            
+
             if not created:
                 return Response(
                     {'errors': 'Вы уже подписаны'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-                
+
             serializer = SubscriptionSerializer(subscription)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
-        # DELETE method
         subscription = Subscription.objects.filter(
             user=request.user,
             author=author
         )
-        
+
         if not subscription.exists():
             return Response(
                 {'errors': 'Вы не подписаны'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-            
+
         subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
