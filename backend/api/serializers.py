@@ -2,7 +2,6 @@ import re
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
-
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
@@ -117,7 +116,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True)
-    cooking_time = serializers.IntegerField()
+    cooking_time = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = Recipe
@@ -126,12 +125,39 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'name', 'text', 'cooking_time'
         )
 
-    def validate_tags(self, tags):
+    def validate(self, data):
+        """Общая валидация для всех полей"""
+        # Валидация тегов
+        tags = data.get('tags', [])
         if not tags:
-            raise serializers.ValidationError('Добавьте хотя бы один тег')
+            raise serializers.ValidationError(
+                {'tags': 'Добавьте хотя бы один тег'}
+            )
         if len(tags) != len(set(tags)):
-            raise serializers.ValidationError('Теги не должны повторяться')
-        return tags
+            raise serializers.ValidationError(
+                {'tags': 'Теги не должны повторяться'}
+            )
+
+        # Валидация ингредиентов
+        ingredients = data.get('ingredients', [])
+        if not ingredients:
+            raise serializers.ValidationError(
+                {'ingredients': 'Добавьте хотя бы один ингредиент'}
+            )
+
+        ingredient_ids = [ingredient['ingredient'].id for ingredient in ingredients]
+        if len(ingredient_ids) != len(set(ingredient_ids)):
+            raise serializers.ValidationError(
+                {'ingredients': 'Ингредиенты не должны повторяться'}
+            )
+
+        for ingredient in ingredients:
+            if ingredient['amount'] <= 0:
+                raise serializers.ValidationError(
+                    {'ingredients': 'Количество ингредиента должно быть больше 0'}
+                )
+
+        return data
 
     def create_ingredients(self, recipe, ingredients):
         RecipeIngredient.objects.bulk_create([
