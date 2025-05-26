@@ -124,7 +124,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'name', 'text', 'cooking_time'
         )
 
-    def validate(self, data):
+    def _validate_ingredients_and_tags(self, data):
         """Общая валидация для ингредиентов и тегов"""
         tags = data.get('tags', [])
         ingredients = data.get('ingredients', [])
@@ -132,7 +132,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         # Валидация тегов
         if not tags:
             raise serializers.ValidationError({'tags': 'Добавьте хотя бы один тег'})
-        if len(tags) != len(set(tags)):
+        if len(tags) != len(set(tag.id for tag in tags)):
             raise serializers.ValidationError({'tags': 'Теги не должны повторяться'})
 
         # Валидация ингредиентов
@@ -153,6 +153,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
         return data
 
+    def validate(self, data):
+        """Общая валидация"""
+        return self._validate_ingredients_and_tags(data)
     def create_ingredients(self, recipe, ingredients):
         RecipeIngredient.objects.bulk_create([
             RecipeIngredient(
