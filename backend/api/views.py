@@ -178,7 +178,8 @@ class RecipeTestViewSet(ModelViewSet):
         obj,
         relation_model,
         relation_field,
-        error_message):
+        error_message
+        ):
         """Общий метод для удаления из связи (корзины/избранного)."""
         try:
             relation = relation_model.objects.get(
