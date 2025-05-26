@@ -95,22 +95,6 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         )
 
 
-class UserCreateForDjoserSerializer(UserCreateSerializer):
-    def validate_username(self, username):
-        if re.search('[!@#$%^&*()_]', username):
-            raise serializers.ValidationError('Не проходит шаблон')
-        return username
-
-    class Meta:
-        model = User
-        fields = ['id',
-                  'username',
-                  'first_name',
-                  'last_name',
-                  'email',
-                  'password']
-
-
 class RecipeCreateSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
     ingredients = RecipeIngredientSerializer(many=True)

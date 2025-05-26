@@ -19,7 +19,7 @@ class FoodgramUser(AbstractUser):
         verbose_name=USERNAME_VERBOSE,
         help_text=USERNAME_HELP,
         unique=True,
-        validators=[UnicodeUsernameValidator]
+        validators=[UnicodeUsernameValidator()]
     )
     email = models.EmailField(
         max_length=EMAIL_MAX_LENGTH,
