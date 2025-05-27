@@ -1,6 +1,5 @@
+from django.conf import settings
 from rest_framework.pagination import PageNumberPagination
-
-from foodgram.settings import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 
 
 class Pagination(PageNumberPagination):
@@ -9,6 +8,6 @@ class Pagination(PageNumberPagination):
     Позволяет клиенту запрашивать размер страницы через параметр limit,
     но ограничивает максимальный размер страницы.
     """
-    page_size = DEFAULT_PAGE_SIZE
-    max_page_size = MAX_PAGE_SIZE
+    page_size = settings.DEFAULT_PAGE_SIZE
+    max_page_size = settings.MAX_PAGE_SIZE
     page_size_query_param = 'limit'
