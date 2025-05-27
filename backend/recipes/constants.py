@@ -5,3 +5,4 @@ MAX_LENGTH_MEASUREMENT = 150
 MIN_COOKING_TIME = 1
 SELF_SUBSCRIBE_ERROR = "Вы не можете подписаться на себя"
 UNIQUE_SHOPPING_CART_ERROR = "Рецепт уже в корзине"
+MIN_AMOUNT_VAL = 1

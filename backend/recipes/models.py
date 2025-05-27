@@ -9,7 +9,8 @@ from .constants import (
     MAX_LENGTH_TEXT,
     MAX_LENGTH_MEASUREMENT,
     MIN_COOKING_TIME,
-    SELF_SUBSCRIBE_ERROR
+    SELF_SUBSCRIBE_ERROR,
+    MIN_AMOUNT_VAL
 )
 User = get_user_model()
 
@@ -153,7 +154,7 @@ class RecipeIngredient(models.Model):
         verbose_name='Количество',
         validators=[
             MinValueValidator(
-                1,
+                MIN_AMOUNT_VAL,
                 message='Количество должно быть не менее 1'
             )
         ]
