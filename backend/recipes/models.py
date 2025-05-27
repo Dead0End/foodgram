@@ -10,7 +10,8 @@ from .constants import (
     MAX_LENGTH_MEASUREMENT,
     MIN_COOKING_TIME,
     SELF_SUBSCRIBE_ERROR,
-    MIN_AMOUNT_VAL
+    MIN_AMOUNT_VAL,
+    MAX_COOKTIME_VAL
 )
 User = get_user_model()
 
@@ -31,6 +32,9 @@ class Tag(models.Model):
     class Meta:
         ordering = ('name',)
         verbose_name = 'Тег'
+
+    def __str__(self):
+        return self.name
 
 
 class Ingredient(models.Model):
@@ -82,7 +86,7 @@ class Recipe(models.Model):
         verbose_name='время на приготовление',
         validators=[
             MinValueValidator(MIN_COOKING_TIME),
-            MaxValueValidator(32767)
+            MaxValueValidator(MAX_COOKTIME_VAL)
         ]
     )
     tags = models.ManyToManyField(
@@ -93,6 +97,9 @@ class Recipe(models.Model):
     class Meta:
         ordering = ('name',)
         verbose_name = 'Рецепт'
+
+    def __str__(self):
+        return self.name
 
 
 class Favourite(models.Model):
@@ -110,6 +117,9 @@ class Favourite(models.Model):
 
     class Meta:
         verbose_name = 'Понравившееся'
+
+    def __str__(self):
+        return f'{self.user.username} - {self.recipe.name}'
 
 
 class Subscription(models.Model):
@@ -160,6 +170,9 @@ class RecipeIngredient(models.Model):
         ]
     )
 
+    def __str__(self):
+        return f'{self.ingredient.name} ({self.amount}) для {self.recipe.name}'
+
 
 class ShoppingCart(models.Model):
     user = models.ForeignKey(
@@ -184,3 +197,6 @@ class ShoppingCart(models.Model):
         ]
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
+
+    def __str__(self):
+        return f'{self.user.username} - {self.recipes.name}'

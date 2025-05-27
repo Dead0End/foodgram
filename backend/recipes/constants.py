@@ -6,3 +6,4 @@ MIN_COOKING_TIME = 1
 SELF_SUBSCRIBE_ERROR = "Вы не можете подписаться на себя"
 UNIQUE_SHOPPING_CART_ERROR = "Рецепт уже в корзине"
 MIN_AMOUNT_VAL = 1
+MAX_COOKTIME_VAL = 32767
