@@ -81,9 +81,7 @@ class UserViewSet(DjoserUserViewSet):
                 {'error': 'Аватар отсутствует'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
         user.avatar.delete()
-
         return Response(
             {'message': 'Аватар успешно удалён'},
             status=status.HTTP_204_NO_CONTENT
@@ -100,32 +98,26 @@ class UserViewSet(DjoserUserViewSet):
                     {'errors': 'Нельзя подписаться на себя'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-
             subscription, created = Subscription.objects.get_or_create(
                 user=user,
                 author=author
             )
-
             if not created:
                 return Response(
                     {'errors': 'Вы уже подписаны'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-
             serializer = SubscriptionSerializer(subscription)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        subscription = Subscription.objects.filter(
+        deleted_count, _ = Subscription.objects.filter(
             user=request.user,
             author=author
-        )
-
-        if not subscription.exists():
+        ).delete()
+        if deleted_count == 0:
             return Response(
                 {'errors': 'Вы не подписаны'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False,
