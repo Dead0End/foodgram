@@ -18,8 +18,7 @@ class Command(BaseCommand):
         try:
             with open(
                 csv_file_path,
-                mode='r',
-                encoding='utf-8-sig') as csvfile:
+                mode='r', encoding='utf-8-sig') as csvfile:
                 reader = csv.reader(csvfile)
                 try:
                     next(reader)
