@@ -157,7 +157,7 @@ class RecipeViewSet(ModelViewSet):
         request = self.context.get('request')
         return (request and request.user.is_authenticated
                 and obj.favourite.filter(user=request.user).exists())
-    
+
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
         return (request and request.user.is_authenticated
@@ -190,8 +190,7 @@ class RecipeViewSet(ModelViewSet):
         if relation_model.objects.filter(**filters).exists():
             relation_model.objects.filter(**filters).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        
-        # Возвращаем ошибку если связь не найдена
+
         return Response(
             {'errors': error_message},
             status=status.HTTP_400_BAD_REQUEST
@@ -250,7 +249,7 @@ class RecipeViewSet(ModelViewSet):
                 tags__slug__in=dict(self.request.query_params)["tags"])
             return recipes
         return super().get_queryset()
-    
+
     @action(
         detail=False,
         methods=['get'],

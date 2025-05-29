@@ -145,8 +145,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             tags_data = validated_data.pop('tags')
         except KeyError:
             raise serializers.ValidationError("Нету тегов или ингридиентов")
-
-        # Получаем пользователя из контекста
         request = self.context.get('request')
         if not request or not request.user.is_authenticated:
             raise serializers.ValidationError('Пользователь не аутентифицирован')
@@ -174,7 +172,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 ingredient=ingredient_data['ingredient'],
                 amount=ingredient_data['amount'])
         return recipe
-
 
     @transaction.atomic
     def update(self, instance, validated_data):
