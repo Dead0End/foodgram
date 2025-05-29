@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = 'Импортирует теги из CSV файла'
 
     def handle(self, *args, **options):
-        csv_file_path = 'backend/data/tags.csv'        
+        csv_file_path = 'backend/data/tags.csv'
         if not os.path.exists(csv_file_path):
             self.stdout.write(self.style.ERROR(
                 f'Файл "{csv_file_path}" не найден. Текущая рабочая директория: {os.getcwd()}'))
