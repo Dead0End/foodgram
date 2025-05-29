@@ -20,7 +20,7 @@ from .pagination import Pagination
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     AvatarSerializer, IngredientSerializer, RecipeShortSerializer,
-    RecipeTestSerializer, SubscriptionSerializer, TagSerializer, UserSerializer
+    RecipeCreateSerializer, RecipeReadSerializer, SubscriptionSerializer, TagSerializer, UserSerializer
 )
 
 User = get_user_model()
@@ -136,13 +136,32 @@ class UserViewSet(DjoserUserViewSet):
         return Response(serializer.data)
 
 
-class RecipeTestViewSet(ModelViewSet):
+class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeTestSerializer
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['author']
     pagination_class = Pagination
+
+    def get_serializer_class(self):
+        if self.action in ('create', 'update', 'partial_update'):
+            return RecipeCreateSerializer
+        return RecipeReadSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+    def get_is_favorited(self, obj):
+        request = self.context.get('request')
+        return (request and request.user.is_authenticated
+                and obj.favourite.filter(user=request.user).exists())
+    
+    def get_is_in_shopping_cart(self, obj):
+        request = self.context.get('request')
+        return (request and request.user.is_authenticated
+                and obj.shopping_cart.filter(user=request.user).exists())
 
     def _add_to_relation(
             self,
@@ -219,20 +238,19 @@ class RecipeTestViewSet(ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_authenticated:
             is_favorited = self.request.query_params.get('is_favorited')
-            is_in_shopping_cart = self.request.query_params.get(
-                'is_in_shopping_cart')
+            is_in_shopping_cart = self.request.query_params.get('is_in_shopping_cart')
             if bool(is_favorited):
                 return super().get_queryset().filter(
-                    favourite__user=self.request.user)
+                    favorites__user=self.request.user)
             if bool(is_in_shopping_cart):
                 return super().get_queryset().filter(
-                    in_shopping_cart__user=self.request.user)
+                    shopping_carts__user=self.request.user)
         if "tags" in self.request.query_params.keys():
             recipes = Recipe.objects.filter(
                 tags__slug__in=dict(self.request.query_params)["tags"])
             return recipes
         return super().get_queryset()
-
+    
     @action(
         detail=False,
         methods=['get'],
