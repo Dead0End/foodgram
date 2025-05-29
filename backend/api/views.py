@@ -167,10 +167,7 @@ class RecipeTestViewSet(ModelViewSet):
     def _remove_from_relation(self, user, obj, relation_model,
                               relation_field, error_message):
         """Общий метод для удаления из связи (корзины/избранного)."""
-        # Формируем фильтр для поиска связи
         filters = {"user": user, relation_field: obj}
-        
-        # Проверяем существование объекта и удаляем его
         if relation_model.objects.filter(**filters).exists():
             relation_model.objects.filter(**filters).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)

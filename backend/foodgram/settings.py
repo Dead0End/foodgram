@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', default='default_key')
 
-DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
+DEBUG = True #os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1').split(',')
 
@@ -129,7 +129,7 @@ DJOSER = {
 }
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://deadendfoodgram.zapto.org',
+    'https://deadendfoodgram.zapto.org', # Django ругается, SRF_TRUSTED_ORIGINS setting must start with a scheme (usually http:// or https://)
 ]
 
 DEFAULT_PAGE_SIZE = 5
