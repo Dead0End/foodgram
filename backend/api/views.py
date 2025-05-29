@@ -20,7 +20,8 @@ from .pagination import Pagination
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
     AvatarSerializer, IngredientSerializer, RecipeShortSerializer,
-    RecipeCreateSerializer, RecipeReadSerializer, SubscriptionSerializer, TagSerializer, UserSerializer
+    RecipeCreateSerializer, RecipeReadSerializer, SubscriptionSerializer,
+    TagSerializer, UserSerializer
 )
 
 User = get_user_model()
@@ -237,7 +238,8 @@ class RecipeViewSet(ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_authenticated:
             is_favorited = self.request.query_params.get('is_favorited')
-            is_in_shopping_cart = self.request.query_params.get('is_in_shopping_cart')
+            is_in_shopping_cart = self.request.query_params.get(
+                'is_in_shopping_cart')
             if bool(is_favorited):
                 return super().get_queryset().filter(
                     favorites__user=self.request.user)

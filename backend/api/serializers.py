@@ -145,7 +145,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Нету тегов или ингридиентов")
         request = self.context.get('request')
         if not request or not request.user.is_authenticated:
-            raise serializers.ValidationError('Пользователь не аутентифицирован')
+            raise serializers.ValidationError('юзер не аутентифицирован')
 
         image = validated_data['image']
         if not image:

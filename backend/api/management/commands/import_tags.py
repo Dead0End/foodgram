@@ -12,11 +12,14 @@ class Command(BaseCommand):
         csv_file_path = 'backend/data/tags.csv'
         if not os.path.exists(csv_file_path):
             self.stdout.write(self.style.ERROR(
-                f'Файл "{csv_file_path}" не найден. Текущая рабочая директория: {os.getcwd()}'))
+                f'"{csv_file_path}" не найден сейчас: {os.getcwd()}'))
             return
         tags_to_create = []
         try:
-            with open(csv_file_path, mode='r', encoding='utf-8-sig') as csvfile:
+            with open(
+                csv_file_path,
+                mode='r',
+                encoding='utf-8-sig') as csvfile:
                 reader = csv.reader(csvfile)
                 try:
                     next(reader)
@@ -35,7 +38,7 @@ class Command(BaseCommand):
                         tags_to_create.append(tag)
                     except (ValidationError, IndexError) as e:
                         self.stdout.write(self.style.ERROR(
-                            f"Ошибка обработки строки {row_num}: {row}. Ошибка: {e}"))
+                            f"Ошибка {row_num}: {row}. Ошибка: {e}"))
                         continue
             created_tags = Tag.objects.bulk_create(
                 tags_to_create,
