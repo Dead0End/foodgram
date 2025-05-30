@@ -93,14 +93,18 @@ class Recipe(models.Model):
         Tag,
         verbose_name='Тег'
     )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания',
+        db_index=True
+    )
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('-created_at',)  # Сортировка от новых к старым
         verbose_name = 'Рецепт'
 
     def __str__(self):
         return self.name
-
 
 class Favourite(models.Model):
     """Класс рецепта, добавленного в избранное"""
