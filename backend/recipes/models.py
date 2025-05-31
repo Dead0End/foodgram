@@ -1,9 +1,8 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth import get_user_model
 
-from  .constants import (
+from .constants import (
     MAX_LENGTH_NAME_TAG,
     MAX_LENGTH_SLUG_TAG,
     MAX_LENGTH_NAME_RECIPE,
@@ -13,8 +12,6 @@ from  .constants import (
     MIN_COOKING_TIME,
     MIN_AMOUNT_VAL,
     MAX_COOKTIME_VAL,
-    SELF_SUBSCRIBE_ERROR,
-    UNIQUE_SHOPPING_CART_ERROR
 )
 
 User = get_user_model()

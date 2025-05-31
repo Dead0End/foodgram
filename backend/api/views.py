@@ -115,8 +115,6 @@ class UserViewSet(DjoserUserViewSet):
                     {'errors': 'Вы уже подписаны'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-        
-        # DELETE method
         deleted_count, _ = Follower.objects.filter(
             user=request.user,
             follow=author
