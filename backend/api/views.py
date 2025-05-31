@@ -161,36 +161,51 @@ class RecipeViewSet(ModelViewSet):
         context['request'] = self.request
         return context
 
-    def _add_to_relation(
-            self,
-            user,
-            obj,
-            relation_model,
-            relation_field,
-            error_message):
-        """Общий метод для добавления в связь (корзину/избранное)."""
-        relation, created = relation_model.objects.get_or_create(
+    def _add_to_favorites(self, user, recipe):
+        """Добавление рецепта в избранное."""
+        favorite, created = Favourite.objects.get_or_create(
             user=user,
-            **{relation_field: obj}
+            recipe=recipe
         )
         if not created:
             return Response(
-                {'errors': error_message},
+                {'errors': 'Рецепт уже в избранном'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        serializer = RecipeShortSerializer(obj)
+        serializer = RecipeShortSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def _remove_from_relation(self, user, obj, relation_model,
-                              relation_field, error_message):
-        """Общий метод для удаления из связи (корзины/избранного)."""
-        filters = {"user": user, relation_field: obj}
-        if relation_model.objects.filter(**filters).exists():
-            relation_model.objects.filter(**filters).delete()
+    def _remove_from_favorites(self, user, recipe):
+        """Удаление рецепта из избранного."""
+        if Favourite.objects.filter(user=user, recipe=recipe).exists():
+            Favourite.objects.filter(user=user, recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-
         return Response(
-            {'errors': error_message},
+            {'errors': 'Рецепт не в избранном'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    def _add_to_shopping_cart(self, user, recipe):
+        """Добавление рецепта в корзину."""
+        cart_item, created = ShoppingCart.objects.get_or_create(
+            user=user,
+            recipes=recipe
+        )
+        if not created:
+            return Response(
+                {'errors': 'Рецепт уже в корзине'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        serializer = RecipeShortSerializer(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def _remove_from_shopping_cart(self, user, recipe):
+        """Удаление рецепта из корзины."""
+        if ShoppingCart.objects.filter(user=user, recipes=recipe).exists():
+            ShoppingCart.objects.filter(user=user, recipes=recipe).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'errors': 'Рецепта нет в корзине'},
             status=status.HTTP_400_BAD_REQUEST
         )
 
@@ -213,24 +228,12 @@ class RecipeViewSet(ModelViewSet):
     )
     def shopping_cart(self, request, pk=None):
         recipe = get_object_or_404(Recipe, id=pk)
-        return self._add_to_relation(
-            user=request.user,
-            obj=recipe,
-            relation_model=ShoppingCart,
-            relation_field='recipes',
-            error_message='Рецепт уже в корзине'
-        )
+        return self._add_to_shopping_cart(request.user, recipe)
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk=None):
         recipe = get_object_or_404(Recipe, id=pk)
-        return self._remove_from_relation(
-            user=request.user,
-            obj=recipe,
-            relation_model=ShoppingCart,
-            relation_field='recipes',
-            error_message='Нету корзины с рецептом'
-        )
+        return self._remove_from_shopping_cart(request.user, recipe)
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
@@ -296,13 +299,7 @@ class RecipeViewSet(ModelViewSet):
             return Response(
                 {'errors': 'Нету такого рецепта'},
                 status=status.HTTP_404_NOT_FOUND)
-        return self._add_to_relation(
-            user=request.user,
-            obj=recipe,
-            relation_model=Favourite,
-            relation_field='recipe',
-            error_message='Уже в избранном'
-        )
+        return self._add_to_favorites(request.user, recipe)
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk=None):
@@ -312,10 +309,4 @@ class RecipeViewSet(ModelViewSet):
             return Response(
                 {'errors': 'Нету такого рецепта'},
                 status=status.HTTP_404_NOT_FOUND)
-        return self._remove_from_relation(
-            user=request.user,
-            obj=recipe,
-            relation_model=Favourite,
-            relation_field='recipe',
-            error_message='Нет в избранном'
-        )
+        return self._remove_from_favorites(request.user, recipe)
