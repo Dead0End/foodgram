@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
@@ -14,7 +15,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.filters import IngredientFilter
 from recipes.models import (
-    Favourite, Ingredient, Recipe, ShoppingCart, Subscription, Tag
+    Favourite, Ingredient, Recipe, ShoppingCart, Tag
 )
 from .pagination import Pagination
 from .permissions import IsAuthorOrReadOnly
@@ -22,6 +23,9 @@ from .serializers import (
     AvatarSerializer, IngredientSerializer, RecipeShortSerializer,
     RecipeCreateSerializer, RecipeReadSerializer, SubscriptionSerializer,
     TagSerializer, UserSerializer
+)
+from users.models import (
+    Follower
 )
 
 User = get_user_model()
@@ -99,20 +103,23 @@ class UserViewSet(DjoserUserViewSet):
                     {'errors': 'Нельзя подписаться на себя'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            subscription, created = Subscription.objects.get_or_create(
-                user=user,
-                author=author
-            )
-            if not created:
+            try:
+                follower = Follower.objects.create(
+                    user=user,
+                    follow=author
+                )
+                serializer = SubscriptionSerializer(follower)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError:
                 return Response(
                     {'errors': 'Вы уже подписаны'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            serializer = SubscriptionSerializer(subscription)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        deleted_count, _ = Subscription.objects.filter(
+        
+        # DELETE method
+        deleted_count, _ = Follower.objects.filter(
             user=request.user,
-            author=author
+            follow=author
         ).delete()
         if deleted_count == 0:
             return Response(
@@ -122,12 +129,12 @@ class UserViewSet(DjoserUserViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False,
-            methods=['get', 'delete'],
+            methods=['get'],
             url_path='subscriptions',
             pagination_class=Pagination,
             serializer_class=SubscriptionSerializer)
     def subscriptions(self, request):
-        queryset = Subscription.objects.filter(user=request.user).all()
+        queryset = Follower.objects.filter(user=request.user).all()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = SubscriptionSerializer(page, many=True)

@@ -7,17 +7,8 @@ from recipes.models import (Recipe,
                             Tag,
                             Favourite,
                             RecipeIngredient,
-                            ShoppingCart,
-                            Subscription)
+                            ShoppingCart)
 User = get_user_model()
-
-
-@admin.register(Subscription)
-class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'author')
-    list_display_links = ('id', 'user')
-    search_fields = ('user__username', 'author__username')
-    list_per_page = 25
 
 
 @admin.register(Recipe)

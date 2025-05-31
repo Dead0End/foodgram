@@ -132,31 +132,6 @@ class Favourite(models.Model):
         return f'{self.user.username} - {self.recipe.name}'
 
 
-class Subscription(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='subscriptions'
-    )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='subscribers'
-    )
-
-    class Meta:
-        unique_together = ('user', 'author')
-        verbose_name = "Подписка"
-        verbose_name_plural = "Подписки"
-
-    def clean(self):
-        if self.user == self.author:
-            raise ValidationError(SELF_SUBSCRIBE_ERROR)
-
-    def __str__(self):
-        return f"{self.user.username} подписан на {self.author.username}"
-
-
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,

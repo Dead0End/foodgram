@@ -9,7 +9,9 @@ from recipes.models import (
     Recipe,
     RecipeIngredient,
     Tag,
-    Subscription,
+)
+from users.models import (
+    Follower
 )
 
 User = get_user_model()
@@ -208,25 +210,25 @@ class AuthorRecipeSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(source='author.email')
-    id = serializers.IntegerField(source='author.id')
-    username = serializers.CharField(source='author.username')
-    first_name = serializers.CharField(source='author.first_name')
-    last_name = serializers.CharField(source='author.last_name')
+    email = serializers.EmailField(source='follow.email')
+    id = serializers.IntegerField(source='follow.id')
+    username = serializers.CharField(source='follow.username')
+    first_name = serializers.CharField(source='follow.first_name')
+    last_name = serializers.CharField(source='follow.last_name')
     is_subscribed = serializers.BooleanField(default=True)
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
-    avatar = serializers.ImageField(source='author.avatar')
+    avatar = serializers.ImageField(source='follow.avatar')
 
     def get_recipes_count(self, obj):
-        return Recipe.objects.filter(author=obj.author).all().count()
+        return Recipe.objects.filter(author=obj.follow).all().count()
 
     def get_recipes(self, obj):
         request = self.context.get('request')
         if not request:
             return []
 
-        recipes = Recipe.objects.filter(author=obj.author).all()
+        recipes = Recipe.objects.filter(author=obj.follow).all()
         recipes_limit = request.query_params.get('recipes_limit')
 
         if recipes_limit is not None:
@@ -241,7 +243,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         ).data
 
     class Meta:
-        model = Subscription
+        model = Follower
         fields = (
             'email',
             'id',
