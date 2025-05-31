@@ -129,7 +129,7 @@ DJOSER = {
 }
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://deadendfoodgram.zapto.org',  # Django ругается, SRF_TRUSTED_ORIGINS setting must start with a scheme (usually http:// or https://)
+    'https://deadendfoodgram.zapto.org'
 ]
 
 DEFAULT_PAGE_SIZE = 5

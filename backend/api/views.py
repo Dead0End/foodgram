@@ -161,16 +161,6 @@ class RecipeViewSet(ModelViewSet):
         context['request'] = self.request
         return context
 
-    def get_is_favorited(self, obj):
-        request = self.context.get('request')
-        return (request and request.user.is_authenticated
-                and obj.favourite.filter(user=request.user).exists())
-
-    def get_is_in_shopping_cart(self, obj):
-        request = self.context.get('request')
-        return (request and request.user.is_authenticated
-                and obj.shopping_cart.filter(user=request.user).exists())
-
     def _add_to_relation(
             self,
             user,
