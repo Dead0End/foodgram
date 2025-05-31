@@ -109,7 +109,8 @@ class UserViewSet(DjoserUserViewSet):
                     follow=author
                 )
                 serializer = SubscriptionSerializer(follower)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.data,
+                                status=status.HTTP_201_CREATED)
             except IntegrityError:
                 return Response(
                     {'errors': 'Вы уже подписаны'},
