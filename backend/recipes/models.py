@@ -3,28 +3,32 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth import get_user_model
 
-from .constants import (
-    MAX_LENGTH_NAME,
-    MAX_LENGTH_SLUG,
-    MAX_LENGTH_TEXT,
+from  .constants import (
+    MAX_LENGTH_NAME_TAG,
+    MAX_LENGTH_SLUG_TAG,
+    MAX_LENGTH_NAME_RECIPE,
+    MAX_LENGTH_NAME_INGREDIENT,
     MAX_LENGTH_MEASUREMENT,
+    MAX_LENGTH_TEXT,
     MIN_COOKING_TIME,
-    SELF_SUBSCRIBE_ERROR,
     MIN_AMOUNT_VAL,
-    MAX_COOKTIME_VAL
+    MAX_COOKTIME_VAL,
+    SELF_SUBSCRIBE_ERROR,
+    UNIQUE_SHOPPING_CART_ERROR
 )
+
 User = get_user_model()
 
 
 class Tag(models.Model):
     """Класс тега."""
     name = models.CharField(
-        max_length=MAX_LENGTH_NAME,
+        max_length=MAX_LENGTH_NAME_TAG,
         verbose_name='Тег',
         unique=True,
     )
     slug = models.SlugField(
-        max_length=MAX_LENGTH_SLUG,
+        max_length=MAX_LENGTH_SLUG_TAG,
         verbose_name='Тег',
         unique=True,
     )
@@ -40,7 +44,7 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     """Класс ингредиента."""
     name = models.CharField(
-        max_length=MAX_LENGTH_NAME,
+        max_length=MAX_LENGTH_NAME_INGREDIENT,
         verbose_name='Ингредиент',
     )
     measurement_unit = models.CharField(
@@ -71,7 +75,7 @@ class Recipe(models.Model):
         verbose_name='автор'
     )
     name = models.CharField(
-        max_length=MAX_LENGTH_NAME,
+        max_length=MAX_LENGTH_NAME_RECIPE,
         verbose_name='Название',
     )
     text = models.CharField(
@@ -100,11 +104,12 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ('-created_at',)  # Сортировка от новых к старым
+        ordering = ('-created_at',)
         verbose_name = 'Рецепт'
 
     def __str__(self):
         return self.name
+
 
 class Favourite(models.Model):
     """Класс рецепта, добавленного в избранное"""
