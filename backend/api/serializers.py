@@ -191,44 +191,38 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
 class AuthorRecipeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User, Recipe
+        model = Recipe
         fields = (
             'id',
-            'tags',
-            'ingredients',
             'name',
             'image',
-            'text',
-            'cooking_time',
-            'username',
-            'first_name',
-            'last_name',
-            'email',
-            'password',
-            'author'
+            'cooking_time'
         )
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(source='follow.email')
-    id = serializers.IntegerField(source='follow.id')
-    username = serializers.CharField(source='follow.username')
-    first_name = serializers.CharField(source='follow.first_name')
-    last_name = serializers.CharField(source='follow.last_name')
-    is_subscribed = serializers.BooleanField(default=True)
+    email = serializers.EmailField(source='follow.email', read_only=True)
+    id = serializers.IntegerField(source='follow.id', read_only=True)
+    username = serializers.CharField(source='follow.username', read_only=True)
+    first_name = serializers.CharField(source='follow.first_name', read_only=True)
+    last_name = serializers.CharField(source='follow.last_name', read_only=True)
+    is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
-    avatar = serializers.ImageField(source='follow.avatar')
+    avatar = serializers.ImageField(source='follow.avatar', read_only=True)
+
+    def get_is_subscribed(self, obj):
+        return True
 
     def get_recipes_count(self, obj):
-        return Recipe.objects.filter(author=obj.follow).all().count()
+        return Recipe.objects.filter(author=obj.follow).count()
 
     def get_recipes(self, obj):
         request = self.context.get('request')
         if not request:
             return []
 
-        recipes = Recipe.objects.filter(author=obj.follow).all()
+        recipes = Recipe.objects.filter(author=obj.follow).order_by('-created_at')
         recipes_limit = request.query_params.get('recipes_limit')
 
         if recipes_limit is not None:
@@ -255,7 +249,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             'recipes_count',
             'avatar',
         )
-        read_only_fields = fields
+
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):

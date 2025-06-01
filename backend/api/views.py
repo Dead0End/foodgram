@@ -108,14 +108,16 @@ class UserViewSet(DjoserUserViewSet):
                     user=user,
                     follow=author
                 )
-                serializer = SubscriptionSerializer(follower)
+                serializer = SubscriptionSerializer(follower, context={'request': request})
                 return Response(serializer.data,
-                                status=status.HTTP_201_CREATED)
+                              status=status.HTTP_201_CREATED)
             except IntegrityError:
                 return Response(
                     {'errors': 'Вы уже подписаны'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+        
+        # DELETE method
         deleted_count, _ = Follower.objects.filter(
             user=request.user,
             follow=author
@@ -133,10 +135,10 @@ class UserViewSet(DjoserUserViewSet):
             pagination_class=Pagination,
             serializer_class=SubscriptionSerializer)
     def subscriptions(self, request):
-        queryset = Follower.objects.filter(user=request.user).all()
+        queryset = Follower.objects.filter(user=request.user).select_related('follow').order_by('-id')
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = SubscriptionSerializer(page, many=True)
+            serializer = SubscriptionSerializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
