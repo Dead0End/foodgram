@@ -93,7 +93,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
-    image = Base64ImageField(required=True)
+    image = Base64ImageField(required=True, allow_null=False)
     ingredients = RecipeIngredientSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True)
@@ -128,6 +128,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Общая валидация"""
         return self._validate_ingredients_and_tags(data)
+    
+    def validate(self, data):
+        if not data.get('image'):
+            raise serializers.ValidationError(
+                {'image': 'Поле image обязательно для заполнения'}
+            )
+        return self._validate_ingredients_and_tags(data)
 
     def create_ingredients(self, recipe, ingredients):
         RecipeIngredient.objects.bulk_create([
@@ -140,54 +147,38 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        try:
-            ingredients_data = validated_data.pop('ingredients')
-            tags_data = validated_data.pop('tags')
-        except KeyError:
-            raise serializers.ValidationError("Нету тегов или ингридиентов")
-        request = self.context.get('request')
-        if not request or not request.user.is_authenticated:
-            raise serializers.ValidationError('юзер не аутентифицирован')
-
-        image = validated_data['image']
-        if not image:
-            raise serializers.ValidationError('Нету изображения')
-        if not ingredients_data:
-            raise serializers.ValidationError('Нету ингридиентов')
-        if not tags_data:
-            raise serializers.ValidationError('Нету тегов')
-        if len(list(tags_data)) != len(set(tags_data)):
-            raise serializers.ValidationError('Теги повторяются')
-
-        recipe = Recipe.objects.create(**validated_data, author=request.user)
-        recipe.tags.set(tags_data)
-
-        ids = []
-        for ingredient_data in ingredients_data:
-            if ingredient_data['ingredient'].pk in ids:
-                raise serializers.ValidationError('Ингридиенты повторяются')
-            ids.append(ingredient_data['ingredient'].pk)
-            RecipeIngredient.objects.create(
-                recipe=recipe,
-                ingredient=ingredient_data['ingredient'],
-                amount=ingredient_data['amount'])
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        recipe = Recipe.objects.create(
+            author=self.context['request'].user,
+            **validated_data
+        )
+        recipe.tags.set(tags)
+        self.create_ingredients(recipe, ingredients)
         return recipe
 
     @transaction.atomic
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        image = validated_data['image']
-        if not image:
-            raise serializers.ValidationError('Нету изображения')
+        
+        # Удаляем старые ингредиенты
         RecipeIngredient.objects.filter(recipe=instance).delete()
-        self.create_ingredients(instance, ingredients)
+        
+        # Обновляем остальные поля
+        instance = super().update(instance, validated_data)
+        
+        # Устанавливаем теги
         instance.tags.set(tags)
-        return super().update(instance, validated_data)
+        
+        # Создаем новые ингредиенты
+        self.create_ingredients(instance, ingredients)
+        
+        return instance
 
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context=self.context).data
-
+    
 
 class AuthorRecipeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -249,7 +240,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             'recipes_count',
             'avatar',
         )
-
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):

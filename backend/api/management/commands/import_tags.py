@@ -2,6 +2,7 @@ import csv
 import os
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from recipes.models import Tag
 
 
@@ -9,10 +10,10 @@ class Command(BaseCommand):
     help = 'Импортирует теги из CSV файла'
 
     def handle(self, *args, **options):
-        csv_file_path = 'backend/data/tags.csv'
+        csv_file_path = settings.BASE_DIR / 'data' / 'tags.csv'
         if not os.path.exists(csv_file_path):
             self.stdout.write(self.style.ERROR(
-                f'"{csv_file_path}" не найден сейчас: {os.getcwd()}'))
+                f'"{csv_file_path}" не найден'))
             return
         tags_to_create = []
         try:

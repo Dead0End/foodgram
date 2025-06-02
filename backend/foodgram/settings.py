@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', default='default_key')
 
-DEBUG = True #os.getenv('DJANGO_DEBUG', 'False') == 'True'
+DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1').split(',')
 
@@ -129,7 +129,7 @@ DJOSER = {
 }
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://deadendfoodgram.zapto.org'
+    r'^https://([a-zA-Z0-9-]+\.)?deadendfoodgram\.zapto\.org$',
 ]
 
 DEFAULT_PAGE_SIZE = 5
