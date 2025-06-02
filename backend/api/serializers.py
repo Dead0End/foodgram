@@ -183,8 +183,10 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='follow.email', read_only=True)
     id = serializers.IntegerField(source='follow.id', read_only=True)
     username = serializers.CharField(source='follow.username', read_only=True)
-    first_name = serializers.CharField(source='follow.first_name', read_only=True)
-    last_name = serializers.CharField(source='follow.last_name', read_only=True)
+    first_name = serializers.CharField(
+        source='follow.first_name', read_only=True)
+    last_name = serializers.CharField(
+        source='follow.last_name', read_only=True)
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
@@ -201,7 +203,8 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         if not request:
             return []
 
-        recipes = Recipe.objects.filter(author=obj.follow).order_by('-created_at')
+        recipes = Recipe.objects.filter(
+            author=obj.follow).order_by('-created_at')
         recipes_limit = request.query_params.get('recipes_limit')
 
         if recipes_limit is not None:
