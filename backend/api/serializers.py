@@ -127,9 +127,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """Общая валидация"""
-        return self._validate_ingredients_and_tags(data)
-
-    def validate(self, data):
         if not data.get('image'):
             raise serializers.ValidationError(
                 {'image': 'Поле image обязательно для заполнения'}
