@@ -110,14 +110,12 @@ class UserViewSet(DjoserUserViewSet):
                 )
                 serializer = SubscriptionSerializer(follower, context={'request': request})
                 return Response(serializer.data,
-                              status=status.HTTP_201_CREATED)
+                                status=status.HTTP_201_CREATED)
             except IntegrityError:
                 return Response(
                     {'errors': 'Вы уже подписаны'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-        
-        # DELETE method
         deleted_count, _ = Follower.objects.filter(
             user=request.user,
             follow=author

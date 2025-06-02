@@ -128,7 +128,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Общая валидация"""
         return self._validate_ingredients_and_tags(data)
-    
+
     def validate(self, data):
         if not data.get('image'):
             raise serializers.ValidationError(
@@ -161,24 +161,15 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        
-        # Удаляем старые ингредиенты
         RecipeIngredient.objects.filter(recipe=instance).delete()
-        
-        # Обновляем остальные поля
         instance = super().update(instance, validated_data)
-        
-        # Устанавливаем теги
         instance.tags.set(tags)
-        
-        # Создаем новые ингредиенты
         self.create_ingredients(instance, ingredients)
-        
         return instance
 
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context=self.context).data
-    
+
 
 class AuthorRecipeSerializer(serializers.ModelSerializer):
     class Meta:
