@@ -112,7 +112,7 @@ class UserViewSet(DjoserUserViewSet):
             serializer = SubscriptionSerializer(
                 author, context={'request': request})
             return Response(serializer.data,
-                            status=status.HTTP_201_CREATED)
+                          status=status.HTTP_201_CREATED)
 
         deleted_count = Follower.objects.filter(
             user=request.user,
@@ -206,8 +206,8 @@ class RecipeViewSet(ModelViewSet):
         permission_classes=[IsAuthorOrReadOnly]
     )
     def generate_short_link(self, request, pk=None):
-        id = get_object_or_404(Recipe, id=pk).id
-        short_link = f'{settings.SITE_DOMAIN}/s/{id}'
+        recipe_id = get_object_or_404(Recipe, id=pk).id
+        short_link = f'{settings.SITE_DOMAIN}/s/{recipe_id}'
         return Response({'short-link': short_link})
 
     def get_queryset(self):
@@ -245,7 +245,9 @@ class RecipeViewSet(ModelViewSet):
         ).order_by('ingredient__name')
 
         content = '\n'.join(
-            [f"{item['ingredient__name']} ({item['ingredient__measurement_unit']}) — {item['total_amount']}"
+            [f"{item['ingredient__name']} "
+             f"({item['ingredient__measurement_unit']}) — "
+             f"{item['total_amount']}"
              for item in ingredients]
         )
         response = HttpResponse(content, content_type='text/plain')
