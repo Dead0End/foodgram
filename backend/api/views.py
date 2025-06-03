@@ -112,7 +112,7 @@ class UserViewSet(DjoserUserViewSet):
             serializer = SubscriptionSerializer(
                 author, context={'request': request})
             return Response(serializer.data,
-                          status=status.HTTP_201_CREATED)
+                            status=status.HTTP_201_CREATED)
 
         deleted_count = Follower.objects.filter(
             user=request.user,
@@ -170,7 +170,7 @@ class RecipeViewSet(ModelViewSet):
             )
             if not created:
                 return Response(
-                    {'errors': f'Рецепт уже в {model_class._meta.verbose_name}'},
+                    {'errors': f'уже есть{model_class._meta.verbose_name}'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             serializer = RecipeShortSerializer(recipe)
@@ -182,7 +182,7 @@ class RecipeViewSet(ModelViewSet):
             ).delete()[0]
             if deleted_count == 0:
                 return Response(
-                    {'errors': f'Рецепта нет в {model_class._meta.verbose_name}'},
+                    {'errors': f'нету{model_class._meta.verbose_name}'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             return Response(status=status.HTTP_204_NO_CONTENT)
