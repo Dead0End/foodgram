@@ -3,7 +3,6 @@ from django.db import transaction
 from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
-from django.db.models import Sum
 
 from recipes.models import (
     Ingredient,
@@ -13,7 +12,6 @@ from recipes.models import (
     Favourite,
     ShoppingCart
 )
-from users.models import Follower
 
 User = get_user_model()
 

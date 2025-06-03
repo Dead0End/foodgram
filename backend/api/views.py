@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.db import models
-from django.db.models import Sum  # Добавлен импорт Sum
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
@@ -18,7 +17,7 @@ from api.filters import IngredientFilter, RecipeFilter
 from recipes.models import (
     Favourite, Ingredient, Recipe, RecipeIngredient, ShoppingCart, Tag
 )
-from users.models import Follower  # Добавлен импорт Follower
+from users.models import Follower
 from .pagination import Pagination
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
@@ -113,7 +112,7 @@ class UserViewSet(DjoserUserViewSet):
             serializer = SubscriptionSerializer(
                 author, context={'request': request})
             return Response(serializer.data,
-                          status=status.HTTP_201_CREATED)
+                            status=status.HTTP_201_CREATED)
 
         deleted_count = Follower.objects.filter(
             user=request.user,
@@ -127,9 +126,9 @@ class UserViewSet(DjoserUserViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False,
-        methods=['get'],
-        url_path='subscriptions',
-        pagination_class=Pagination)
+            methods=['get'],
+            url_path='subscriptions',
+            pagination_class=Pagination)
     def subscriptions(self, request):
         authors = User.objects.filter(
             follow__user=request.user
@@ -199,7 +198,7 @@ class RecipeViewSet(ModelViewSet):
         action_type = 'add' if request.method == 'POST' else 'remove'
         return self._handle_recipe_action(
             request.user, recipe, ShoppingCart, action_type)
-    
+
     @action(
         detail=True,
         methods=['get'],
