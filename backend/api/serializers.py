@@ -3,16 +3,17 @@ from django.db import transaction
 from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
+from django.db.models import Sum
 
 from recipes.models import (
     Ingredient,
     Recipe,
     RecipeIngredient,
     Tag,
+    Favourite,
+    ShoppingCart
 )
-from users.models import (
-    Follower
-)
+from users.models import Follower
 
 User = get_user_model()
 
@@ -76,12 +77,12 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         return (request and request.user.is_authenticated
-                and obj.favorites.filter(user=request.user).exists())
+                and Favourite.objects.filter(user=request.user, recipe=obj).exists())
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
         return (request and request.user.is_authenticated
-                and obj.shopping_carts.filter(user=request.user).exists())
+                and ShoppingCart.objects.filter(user=request.user, recipes=obj).exists())
 
     class Meta:
         model = Recipe
@@ -105,6 +106,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'name', 'text', 'cooking_time'
         )
 
+    def validate_image(self, value):
+        if not value:
+            raise serializers.ValidationError(
+                {'image': 'Поле image обязательно для заполнения'}
+            )
+        return value
+
     def _validate_ingredients_and_tags(self, data):
         """Общая валидация для ингредиентов и тегов"""
         tags = data.get('tags', [])
@@ -127,10 +135,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """Общая валидация"""
-        if not data.get('image'):
-            raise serializers.ValidationError(
-                {'image': 'Поле image обязательно для заполнения'}
-            )
+        if 'image' in self.initial_data:
+            self.validate_image(data.get('image'))
         return self._validate_ingredients_and_tags(data)
 
     def create_ingredients(self, recipe, ingredients):
@@ -179,32 +185,19 @@ class AuthorRecipeSerializer(serializers.ModelSerializer):
         )
 
 
-class SubscriptionSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(source='follow.email', read_only=True)
-    id = serializers.IntegerField(source='follow.id', read_only=True)
-    username = serializers.CharField(source='follow.username', read_only=True)
-    first_name = serializers.CharField(
-        source='follow.first_name', read_only=True)
-    last_name = serializers.CharField(
-        source='follow.last_name', read_only=True)
-    is_subscribed = serializers.SerializerMethodField()
+class SubscriptionSerializer(UserSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
-    avatar = serializers.ImageField(source='follow.avatar', read_only=True)
-
-    def get_is_subscribed(self, obj):
-        return True
 
     def get_recipes_count(self, obj):
-        return Recipe.objects.filter(author=obj.follow).count()
+        return Recipe.objects.filter(author=obj).count()
 
     def get_recipes(self, obj):
         request = self.context.get('request')
         if not request:
             return []
 
-        recipes = Recipe.objects.filter(
-            author=obj.follow).order_by('-created_at')
+        recipes = Recipe.objects.filter(author=obj).order_by('-created_at')
         recipes_limit = request.query_params.get('recipes_limit')
 
         if recipes_limit is not None:
@@ -218,19 +211,8 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             recipes, many=True, context={'request': request}
         ).data
 
-    class Meta:
-        model = Follower
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
-            'recipes',
-            'recipes_count',
-            'avatar',
-        )
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + ['recipes', 'recipes_count']
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):

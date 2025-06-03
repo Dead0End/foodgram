@@ -20,4 +20,6 @@ router.register('recipes', RecipeViewSet, basename='recipes')
 urlpatterns = [
     path('', include(router.urls)),
     path('auth/', include('djoser.urls.authtoken')),
+    path('api/users/', UserViewSet.as_view({'get': 'list'}), name='users'),
+    path('api/users/me/', UserViewSet.as_view({'get': 'me'}), name='user-me'),
 ]
