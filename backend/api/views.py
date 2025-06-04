@@ -134,14 +134,9 @@ class UserViewSet(DjoserUserViewSet):
             follow__user=request.user
         )
         page = self.paginate_queryset(authors)
-        if page is not None:
-            serializer = SubscriptionSerializer(
-                page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-
         serializer = SubscriptionSerializer(
-            authors, many=True, context={'request': request})
-        return Response(serializer.data)
+            page, many=True, context={'request': request})
+        return self.get_paginated_response(serializer.data)
 
 
 class RecipeViewSet(ModelViewSet):
