@@ -126,19 +126,19 @@ class UserViewSet(DjoserUserViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False,
-            methods=['get'],
-            url_path='subscriptions',
-            pagination_class=Pagination)
+        methods=['get'],
+        url_path='subscriptions',
+        pagination_class=Pagination)
     def subscriptions(self, request):
         authors = User.objects.filter(
             follow__user=request.user
-        ).distinct()
+        )
         page = self.paginate_queryset(authors)
         if page is not None:
             serializer = SubscriptionSerializer(
                 page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
-
+    
         serializer = SubscriptionSerializer(
             authors, many=True, context={'request': request})
         return Response(serializer.data)
