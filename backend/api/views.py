@@ -126,9 +126,9 @@ class UserViewSet(DjoserUserViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False,
-        methods=['get'],
-        url_path='subscriptions',
-        pagination_class=Pagination)
+            methods=['get'],
+            url_path='subscriptions',
+            pagination_class=Pagination)
     def subscriptions(self, request):
         authors = User.objects.filter(
             follow__user=request.user
@@ -174,7 +174,7 @@ class RecipeViewSet(ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             serializer = RecipeShortSerializer(recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)    
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         deleted_count = model_class.objects.filter(
             user=user,
             **{'recipe' if model_class == Favourite else 'recipes': recipe}
