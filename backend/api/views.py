@@ -210,24 +210,6 @@ class RecipeViewSet(ModelViewSet):
         short_link = f'{settings.SITE_DOMAIN}/s/{recipe_id}'
         return Response({'short-link': short_link})
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        if self.request.user.is_authenticated:
-            is_favorited = self.request.query_params.get('is_favorited')
-            is_in_shopping_cart = self.request.query_params.get(
-                'is_in_shopping_cart')
-            if bool(is_favorited):
-                return queryset.filter(
-                    favorites__user=self.request.user)
-            if bool(is_in_shopping_cart):
-                return queryset.filter(
-                    shopping_carts__user=self.request.user)
-        if "tags" in self.request.query_params.keys():
-            recipes = queryset.filter(
-                tags__slug__in=dict(self.request.query_params)["tags"])
-            return recipes
-        return queryset
-
     @action(
         detail=False,
         methods=['get'],
