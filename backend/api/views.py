@@ -138,7 +138,7 @@ class UserViewSet(DjoserUserViewSet):
             serializer = SubscriptionSerializer(
                 page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
-    
+
         serializer = SubscriptionSerializer(
             authors, many=True, context={'request': request})
         return Response(serializer.data)
@@ -174,18 +174,17 @@ class RecipeViewSet(ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             serializer = RecipeShortSerializer(recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            deleted_count = model_class.objects.filter(
-                user=user,
-                **{'recipe' if model_class == Favourite else 'recipes': recipe}
-            ).delete()[0]
-            if deleted_count == 0:
-                return Response(
-                    {'errors': f'нету{model_class._meta.verbose_name}'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)    
+        deleted_count = model_class.objects.filter(
+            user=user,
+            **{'recipe' if model_class == Favourite else 'recipes': recipe}
+        ).delete()[0]
+        if deleted_count == 0:
+            return Response(
+                {'errors': f'нету{model_class._meta.verbose_name}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True,
