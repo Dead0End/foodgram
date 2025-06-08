@@ -1,10 +1,11 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
+from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import (
@@ -27,6 +28,14 @@ from .serializers import (
 )
 
 User = get_user_model()
+
+
+class ShortLinkRedirectView(APIView):
+    """Перенаправление по короткой ссылке на страницу рецепта."""
+    permission_classes = [AllowAny]
+
+    def get(self, request, recipe_id):
+        return redirect(f'/api/recipes/{recipe_id}/')
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
