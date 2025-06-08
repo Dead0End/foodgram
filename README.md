@@ -43,7 +43,9 @@ docker-compose exec backend python manage.py migrate
 ```bash
 docker-compose exec backend python manage.py import_ingredients
 docker-compose exec backend python manage.py import_tags
+```
 6.соберите статику и создайте суперпользователя
+```bash
 docker-compose exec backend python manage.py collectstatic
 docker-compose exec backend python manage.py createsuperuser
 ```
