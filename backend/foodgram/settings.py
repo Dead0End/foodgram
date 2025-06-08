@@ -129,7 +129,7 @@ DJOSER = {
 }
 
 CSRF_TRUSTED_ORIGINS = [
-    r'^https://([a-zA-Z0-9-]+\.)?defoodgram\.zapto\.org$',
+    r'^https://([a-zA-Z0-9-]+\.)?deadendfoodgram\.zapto\.org$',
 ]
 
 DEFAULT_PAGE_SIZE = 5
