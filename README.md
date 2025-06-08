@@ -15,6 +15,7 @@ Djoser,
 1. Клонирование репозитория
 ```bash
 git clone https://github.com/Dead0End/foodgram.git
+```
 
 2. Настройка переменных окружения
 Создайте файл .env в корне проекта со следующими данными:
@@ -32,15 +33,20 @@ CSRF_TRUSTED_ORIGINS=Домен_вашего_сайта
 3. Сборка и запуск Docker-образов
 ```bash
 docker-compose down && docker-compose up --build
+```
 
 4. Выполните миграции,
+```bash
 docker-compose exec backend python manage.py migrate
+```
 5. Загрузите ингредиенты, и теги
+```bash
 docker-compose exec backend python manage.py import_ingredients
 docker-compose exec backend python manage.py import_tags
 6.соберите статику и создайте суперпользователя
 docker-compose exec backend python manage.py collectstatic
 docker-compose exec backend python manage.py createsuperuser
+```
 7. Приложения:
 https://defoodgram.zapto.org/
 8. Тестирование
