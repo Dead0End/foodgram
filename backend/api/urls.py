@@ -5,7 +5,8 @@ from api.views import (
     IngredientViewSet,
     TagViewSet,
     UserViewSet,
-    RecipeViewSet
+    RecipeViewSet,
+    ShortLinkRedirectView
 )
 
 app_name = 'api'
@@ -22,4 +23,6 @@ urlpatterns = [
     path('auth/', include('djoser.urls.authtoken')),
     path('api/users/', UserViewSet.as_view({'get': 'list'}), name='users'),
     path('api/users/me/', UserViewSet.as_view({'get': 'me'}), name='user-me'),
+    path('s/<int:recipe_id>/', ShortLinkRedirectView.as_view(), name='short-link'),
+
 ]
