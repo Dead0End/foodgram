@@ -29,10 +29,11 @@ from .serializers import (
 
 User = get_user_model()
 
+
 class ShortLinkRedirectView(APIView):
     """Перенаправление по короткой ссылке на страницу рецепта."""
     permission_classes = [AllowAny]
-    
+
     def get(self, request, recipe_id):
         return redirect(f'/api/recipes/{recipe_id}/')
 
