@@ -6,5 +6,5 @@ from api.views import short_url
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('https://recipes/<int:pk>', short_url, name='short_url')
+    path('recipes/<int:pk>', short_url, name='short_url')
 ]
