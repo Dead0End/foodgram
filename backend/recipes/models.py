@@ -67,10 +67,6 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     """Класс рецепта."""
-
-    def get_absolute_url(self):
-        return reverse('recipe-detail', kwargs={'pk': self.pk})
-
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
