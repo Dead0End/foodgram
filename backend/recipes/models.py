@@ -1,6 +1,7 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 from .constants import (
     MAX_LENGTH_NAME_TAG,
@@ -66,6 +67,10 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     """Класс рецепта."""
+
+    def get_absolute_url(self):
+        return reverse('recipe-detail', kwargs={'pk': self.pk})
+    
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -99,6 +104,7 @@ class Recipe(models.Model):
         verbose_name='Дата создания',
         db_index=True
     )
+    
 
     class Meta:
         ordering = ('-created_at',)
