@@ -128,9 +128,7 @@ DJOSER = {
     },
 }
 
-CSRF_TRUSTED_ORIGINS = [
-    r'^https://([a-zA-Z0-9-]+\.)?deadendfoodgram\.zapto\.org$',
-]
+CSRF_TRUSTED_ORIGINS = ['https://deadendfoodgram.zapto.org']
 
 DEFAULT_PAGE_SIZE = 5
 MAX_PAGE_SIZE = 20
