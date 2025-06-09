@@ -197,16 +197,18 @@ class RecipeViewSet(ModelViewSet):
             request.user, recipe, ShoppingCart, action_type)
 
     @action(
-        detail=True,
-        methods=['GET'],
-        permission_classes=[AllowAny],
-        url_path='get-link',
-        url_name='get-link',
+    detail=True,
+    methods=['GET'],
+    permission_classes=[AllowAny],
+    url_path='get-link',
+    url_name='get-link',
     )
     def get_link(self, request, pk=None):
         recipe = get_object_or_404(Recipe, pk=pk)
         rev_link = reverse('short_url', args=[recipe.pk])
-        return Response({'short-link': request.build_absolute_uri(rev_link)},
+        # Явно заменяем http на https
+        absolute_uri = request.build_absolute_uri(rev_link).replace('http://', 'https://')
+        return Response({'short-link': absolute_uri},
                         status=status.HTTP_200_OK,)
 
     @action(
