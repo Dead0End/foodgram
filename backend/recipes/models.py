@@ -70,7 +70,7 @@ class Recipe(models.Model):
 
     def get_absolute_url(self):
         return reverse('recipe-detail', kwargs={'pk': self.pk})
-    
+
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -104,7 +104,6 @@ class Recipe(models.Model):
         verbose_name='Дата создания',
         db_index=True
     )
-    
 
     class Meta:
         ordering = ('-created_at',)
