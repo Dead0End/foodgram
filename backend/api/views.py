@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db.models import Sum
@@ -6,7 +5,6 @@ from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from django.views.decorators.http import require_GET
-from django.views import View
 from djoser.views import UserViewSet as DjoserUserViewSet
 
 from rest_framework import status
@@ -249,6 +247,7 @@ class RecipeViewSet(ModelViewSet):
         action_type = 'add' if request.method == 'POST' else 'remove'
         return self._handle_recipe_action(
             request.user, recipe, Favourite, action_type)
+
 
 @require_GET
 def short_url(request, pk):
