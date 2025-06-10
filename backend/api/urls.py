@@ -22,5 +22,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('auth/', include('djoser.urls.authtoken')),
     path('api/users/', UserViewSet.as_view({'get': 'list'}), name='users'),
-    path('recipes/<int:recipe_id>/', redirect_recipe_short_link, name='recipe-short-link'),
+    path('recipes/<int:recipe_id>/',
+         redirect_recipe_short_link,
+         name='recipe-short-link'),
 ]
