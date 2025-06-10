@@ -64,49 +64,45 @@ class Ingredient(models.Model):
         return f'{self.name}, {self.measurement_unit}'
 
 
-class Recipe(models.Model): 
-    """Класс рецепта.""" 
-    author = models.ForeignKey( 
-        User, 
-        on_delete=models.CASCADE, 
-        verbose_name='автор' 
-    ) 
-    name = models.CharField( 
-        max_length=MAX_LENGTH_NAME_RECIPE, 
-        verbose_name='Название', 
-    ) 
-    text = models.CharField( 
-        max_length=MAX_LENGTH_TEXT, 
-        verbose_name='Рецепт' 
-    ) 
-    image = models.ImageField( 
-        verbose_name='Фото', 
-        upload_to='recipes/images' 
-    ) 
-    cooking_time = models.PositiveSmallIntegerField( 
-        verbose_name='время на приготовление', 
-        validators=[ 
-            MinValueValidator(MIN_COOKING_TIME), 
-            MaxValueValidator(MAX_COOKTIME_VAL) 
-        ] 
-    ) 
-    tags = models.ManyToManyField( 
-        Tag, 
-        verbose_name='Тег' 
-    ) 
-    created_at = models.DateTimeField( 
-        auto_now_add=True, 
-        verbose_name='Дата создания', 
-        db_index=True 
-    ) 
- 
-    class Meta: 
-        ordering = ('-created_at',) 
-        verbose_name = 'Рецепт' 
- 
-    def __str__(self): 
-        return self.name 
- 
+class Recipe(models.Model):
+    """Класс рецепта."""
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='автор'
+    )
+    name = models.CharField(
+        max_length=MAX_LENGTH_NAME_RECIPE,
+        verbose_name='Название',
+    )
+    text = models.CharField(
+        max_length=MAX_LENGTH_TEXT,
+        verbose_name='Рецепт'
+    )
+    image = models.ImageField(
+        verbose_name='Фото',
+        upload_to='recipes/images'
+    )
+    cooking_time = models.PositiveSmallIntegerField(
+        verbose_name='время на приготовление',
+        validators=[
+            MinValueValidator(MIN_COOKING_TIME),
+            MaxValueValidator(MAX_COOKTIME_VAL)
+        ]
+    )
+    tags = models.ManyToManyField(
+        Tag,
+        verbose_name='Тег'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания',
+        db_index=True
+    )
+
+    class Meta:
+        ordering = ('-created_at',)
+        verbose_name = 'Рецепт'
 
     def __str__(self):
         return self.name
