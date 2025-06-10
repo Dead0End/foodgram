@@ -198,8 +198,7 @@ class RecipeViewSet(ModelViewSet):
         detail=True,
         methods=['get'],
         url_path='get-link',
-        permission_classes=[IsAuthorOrReadOnly]
-        )
+        permission_classes=[IsAuthorOrReadOnly])
     def generate_short_link(self, request, pk=None):
         recipe = get_object_or_404(Recipe, id=pk)
         short_code = encode_recipe_id(recipe.id)
