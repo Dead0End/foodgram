@@ -277,6 +277,6 @@ def redirect_short_link(request, short_code):
     try:
         recipe_id = decode_short_code(short_code)
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        return redirect('recipe-detail', pk=recipe.id)  # или прямой URL
+        return redirect(f'/api/recipes/{recipe.id}')
     except (ValueError, Http404):
         raise Http404("Страница не найдена")
