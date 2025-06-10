@@ -201,7 +201,7 @@ class RecipeViewSet(ModelViewSet):
     )
     def generate_short_link(self, request, pk=None):
         recipe_id = get_object_or_404(Recipe, id=pk).id
-        short_link = f'{settings.SITE_DOMAIN}/s/{recipe_id}'
+        short_link = f'{settings.SITE_DOMAIN}/recipes/{recipe_id}'
         return Response({'short-link': short_link})
 
     @action(
