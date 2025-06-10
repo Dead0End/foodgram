@@ -205,7 +205,7 @@ class RecipeViewSet(ModelViewSet):
         short_code = encode_recipe_id(recipe.id)
         short_link = f'{settings.SITE_DOMAIN}/s/{short_code}'
         return Response({'short-link': short_link})
-    
+
     @action(
         detail=False,
         methods=['get'],
