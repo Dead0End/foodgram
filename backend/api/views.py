@@ -205,7 +205,6 @@ class RecipeViewSet(ModelViewSet):
     def get_link(self, request, pk=None):
         recipe = get_object_or_404(Recipe, pk=pk)
         rev_link = reverse('short_url', args=[recipe.pk])
-        # Явно заменяем http на https
         absolute_uri = request.build_absolute_uri(rev_link).replace('http://', 'https://')
         return Response({'short-link': absolute_uri},
                         status=status.HTTP_200_OK,)
