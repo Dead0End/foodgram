@@ -1,12 +1,12 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.permissions import (
     AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 )
@@ -201,7 +201,7 @@ class RecipeViewSet(ModelViewSet):
     )
     def generate_short_link(self, request, pk=None):
         recipe_id = get_object_or_404(Recipe, id=pk).id
-        short_link = f'{settings.SITE_DOMAIN}/recipes/{recipe_id}'
+        short_link = f'{settings.SITE_DOMAIN}/r/{recipe_id}'  # Используем префикс /r/ для коротких ссылок
         return Response({'short-link': short_link})
 
     @action(
@@ -242,3 +242,9 @@ class RecipeViewSet(ModelViewSet):
         action_type = 'add' if request.method == 'POST' else 'remove'
         return self._handle_recipe_action(
             request.user, recipe, Favourite, action_type)
+
+
+@api_view(['GET'])
+def redirect_recipe_short_link(request, recipe_id):
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+    return redirect(f'/recipes/{recipe_id}')
