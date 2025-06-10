@@ -241,4 +241,4 @@ class RecipeViewSet(ModelViewSet):
         recipe = get_object_or_404(Recipe, pk=pk)
         action_type = 'add' if request.method == 'POST' else 'remove'
         return self._handle_recipe_action(
-            request.user, recipe, Favourite, action_type
+            request.user, recipe, Favourite, action_type)
