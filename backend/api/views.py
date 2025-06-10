@@ -194,17 +194,13 @@ class RecipeViewSet(ModelViewSet):
         return self._handle_recipe_action(
             request.user, recipe, ShoppingCart, action_type)
 
-    @action(
-        detail=True,
-        methods=['get'],
-        url_path='get-link',
-        permission_classes=[IsAuthorOrReadOnly])
+    @action(detail=True, methods=['get'], url_path='get-link')
     def generate_short_link(self, request, pk=None):
         recipe = get_object_or_404(Recipe, id=pk)
         short_code = encode_recipe_id(recipe.id)
         short_link = f'{settings.SITE_DOMAIN}/s/{short_code}'
         return Response({'short-link': short_link})
-
+    
     @action(
         detail=False,
         methods=['get'],
@@ -261,12 +257,10 @@ class RecipeViewSet(ModelViewSet):
 
 
 def encode_recipe_id(recipe_id):
-    """Кодирует ID рецепта в короткую строку"""
     return base64.urlsafe_b64encode(str(recipe_id).encode()).decode().rstrip('=')
 
 
 def decode_short_code(short_code):
-    """Декодирует короткую строку обратно в ID рецепта"""
     padding = len(short_code) % 4
     if padding:
         short_code += '=' * (4 - padding)
@@ -277,6 +271,6 @@ def redirect_short_link(request, short_code):
     try:
         recipe_id = decode_short_code(short_code)
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        return redirect(f'/api/recipes/{recipe.id}')
+        return redirect('recipe-detail', pk=recipe.id)
     except (ValueError, Http404):
         raise Http404("Страница не найдена")
