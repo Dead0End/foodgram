@@ -1,6 +1,5 @@
 from rest_framework import routers
 from django.urls import path, include
-from . import views
 
 from api.views import (
     IngredientViewSet,
@@ -23,5 +22,4 @@ urlpatterns = [
     path('auth/', include('djoser.urls.authtoken')),
     path('api/users/', UserViewSet.as_view({'get': 'list'}), name='users'),
     path('api/users/me/', UserViewSet.as_view({'get': 'me'}), name='user-me'),
-    path('s/<str:short_code>/', views.redirect_short_link, name='short-url-redirect'),
 ]

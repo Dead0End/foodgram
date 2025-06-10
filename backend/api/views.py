@@ -1,9 +1,8 @@
-import base64
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
-from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponse, Http404
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import status
@@ -194,27 +193,16 @@ class RecipeViewSet(ModelViewSet):
         return self._handle_recipe_action(
             request.user, recipe, ShoppingCart, action_type)
 
-    @action(detail=True, methods=['get'], url_path='get-link')
-    def generate_short_link(self, request, pk=None):
-        recipe = get_object_or_404(Recipe, id=pk)
-        short_code = encode_recipe_id(recipe.id)
-        short_link = f'{settings.SITE_DOMAIN}/s/{short_code}'
-        return Response({'short-link': short_link})
-
     @action(
-        detail=False,
+        detail=True,
         methods=['get'],
-        url_path='resolve/(?P<short_code>[^/.]+)',
-        permission_classes=[AllowAny]
+        url_path='get-link',
+        permission_classes=[IsAuthorOrReadOnly]
     )
-    def resolve_short_link(self, request, short_code=None):
-        try:
-            recipe_id = decode_short_code(short_code)
-            recipe = get_object_or_404(Recipe, id=recipe_id)
-            serializer = self.get_serializer(recipe)
-            return Response(serializer.data)
-        except (ValueError, Http404):
-            raise Http404("Ссылка не найдена")
+    def generate_short_link(self, request, pk=None):
+        recipe_id = get_object_or_404(Recipe, id=pk).id
+        short_link = f'{settings.SITE_DOMAIN}/s/{recipe_id}'
+        return Response({'short-link': short_link})
 
     @action(
         detail=False,
@@ -254,23 +242,3 @@ class RecipeViewSet(ModelViewSet):
         action_type = 'add' if request.method == 'POST' else 'remove'
         return self._handle_recipe_action(
             request.user, recipe, Favourite, action_type)
-
-
-def encode_recipe_id(recipe_id):
-    return base64.urlsafe_b64encode(str(recipe_id).encode()).decode().rstrip('=')
-
-
-def decode_short_code(short_code):
-    padding = len(short_code) % 4
-    if padding:
-        short_code += '=' * (4 - padding)
-    return int(base64.urlsafe_b64decode(short_code.encode()).decode())
-
-
-def redirect_short_link(request, short_code):
-    try:
-        recipe_id = decode_short_code(short_code)
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        return redirect('recipe-detail', pk=recipe.id)
-    except (ValueError, Http404):
-        raise Http404("Страница не найдена")
